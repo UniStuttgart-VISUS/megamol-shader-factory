@@ -16,7 +16,7 @@ find_package(Git)
 include("CMakeExternals.cmake")
 
 # Add externals
-require_external(glslang)
+require_external(shaderc)
 
 # Collect source files
 file(GLOB_RECURSE public_header_files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "include/*.h" "include/*.inl")
@@ -36,7 +36,7 @@ if (MSVC)
 endif()
 target_include_directories(${PROJECT_NAME}
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> "src" "include")
-target_link_libraries(${PROJECT_NAME} PRIVATE glslang)
+target_link_libraries(${PROJECT_NAME} PRIVATE shaderc)
 
 # Source groups in Visual Studio
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER base)

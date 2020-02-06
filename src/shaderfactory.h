@@ -1,6 +1,9 @@
 #pragma once
 
-#include "glslang/Public/ShaderLang.h"
+
+#include "shaderc/shaderc.h"
+
+//#include "glslang/Public/ShaderLang.h"
 
 namespace megamol {
 namespace shaderfactory {
@@ -19,9 +22,13 @@ public:
     }
 
 private:
-    shaderfactory() { glslang::InitializeProcess(); }
+    shaderfactory() {
+        //glslang::InitializeProcess();
+    }
 
-    ~shaderfactory() { glslang::FinalizeProcess(); }
+    ~shaderfactory() {
+        // glslang::FinalizeProcess();
+    }
 };
 
 } // end namespace shaderfactory

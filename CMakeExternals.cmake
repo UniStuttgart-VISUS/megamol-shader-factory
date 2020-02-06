@@ -13,30 +13,30 @@ include("${CMAKE_BINARY_DIR}/script-externals/cmake/External.cmake")
 function(require_external NAME)
   set(FETCHCONTENT_QUIET ON CACHE BOOL "")
 
-  if(NAME STREQUAL "glslang")
-    if(TARGET glslang)
+  if(NAME STREQUAL "shaderc")
+    if(TARGET shaderc)
       return()
     endif()
 
     if(WIN32)
-      set(GLSLANG_LIB "lib/glslang<SUFFIX>.lib")
+      set(SHADERC_LIB "lib/shaderc.lib")
     else()
       include(GNUInstallDirs)
-      set(GLSLANG_LIB "${CMAKE_INSTALL_LIBDIR}/libglslang.a")
+      set(SHADERC_LIB "${CMAKE_INSTALL_LIBDIR}/libshaderc.a")
     endif()
 
-    add_external_project(glslang STATIC
-      GIT_REPOSITORY https://github.com/KhronosGroup/glslang.git
-      GIT_TAG "8.13.3559"
-      BUILD_BYPRODUCTS "<INSTALL_DIR>/${GLSLANG_LIB}"
-      DEBUG_SUFFIX "d"
-      CMAKE_ARGS
-        -DBUILD_TESTING=OFF
-        -DENABLE_HLSL=OFF
-        -DENABLE_PCH=OFF)
+    external_get_property(shaderc SOURCE_DIR)
 
-    add_external_library(glslang
-      LIBRARY ${GLSLANG_LIB})
+    add_external_project(shaderc STATIC
+      GIT_REPOSITORY https://github.com/google/shaderc.git
+      GIT_TAG "v2019.1"
+      BUILD_BYPRODUCTS "<INSTALL_DIR>/${SHADERC_LIB}"
+      PATCH_COMMAND ${CMAKE_COMMAND} -D SOURCE_DIR=${SOURCE_DIR} -D GIT_EXECUTABLE=${GIT_EXECUTABLE} -P "${CMAKE_SOURCE_DIR}/cmake/shaderc/deps.cmake"
+      CMAKE_ARGS
+        -DSHADERC_SKIP_TESTS=ON)
+
+    add_external_library(shaderc
+      LIBRARY ${SHADERC_LIB})
   else()
     message(FATAL_ERROR "Unknown external required \"${NAME}\"")
   endif()
