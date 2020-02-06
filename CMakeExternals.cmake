@@ -25,13 +25,11 @@ function(require_external NAME)
       set(SHADERC_LIB "${CMAKE_INSTALL_LIBDIR}/libshaderc.a")
     endif()
 
-    external_get_property(shaderc SOURCE_DIR)
-
     add_external_project(shaderc STATIC
       GIT_REPOSITORY https://github.com/google/shaderc.git
       GIT_TAG "v2019.1"
       BUILD_BYPRODUCTS "<INSTALL_DIR>/${SHADERC_LIB}"
-      PATCH_COMMAND ${CMAKE_COMMAND} -D SOURCE_DIR=${SOURCE_DIR} -D GIT_EXECUTABLE=${GIT_EXECUTABLE} -P "${CMAKE_SOURCE_DIR}/cmake/shaderc/deps.cmake"
+      PATCH_COMMAND ${CMAKE_COMMAND} -D SOURCE_DIR=<SOURCE_DIR> -D GIT_EXECUTABLE=${GIT_EXECUTABLE} -P "${CMAKE_SOURCE_DIR}/cmake/shaderc/deps.cmake"
       CMAKE_ARGS
         -DSHADERC_SKIP_TESTS=ON)
 
