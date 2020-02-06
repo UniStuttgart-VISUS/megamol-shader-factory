@@ -15,6 +15,8 @@ find_package(Git)
 # External
 include("CMakeExternals.cmake")
 
+add_subdirectory(glad)
+
 # Add externals
 require_external(shaderc)
 
@@ -36,7 +38,7 @@ if (MSVC)
 endif()
 target_include_directories(${PROJECT_NAME}
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> "src" "include")
-target_link_libraries(${PROJECT_NAME} PRIVATE shaderc)
+target_link_libraries(${PROJECT_NAME} PRIVATE shaderc glad)
 
 # Source groups in Visual Studio
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER base)
