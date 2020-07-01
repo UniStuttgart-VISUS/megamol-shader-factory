@@ -11,6 +11,8 @@ namespace megamol::shaderfactory {
 
 class includer final : public shaderc::CompileOptions::IncluderInterface {
 public:
+    includer(std::filesystem::path const& shader_include_path);
+
     // Handles shaderc_include_resolver_fn callbacks.
     shaderc_include_result* GetInclude(const char* requested_source, shaderc_include_type type,
         const char* requesting_source, size_t include_depth) override;
