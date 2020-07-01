@@ -19,10 +19,10 @@ function(require_external NAME)
     endif()
 
     if(WIN32)
-      set(SHADERC_LIB "lib/shaderc.lib")
+      set(SHADERC_LIB "lib/shaderc_combined.lib")
     else()
       include(GNUInstallDirs)
-      set(SHADERC_LIB "${CMAKE_INSTALL_LIBDIR}/libshaderc.a")
+      set(SHADERC_LIB "${CMAKE_INSTALL_LIBDIR}/libshaderc_combined.a")
     endif()
 
     add_external_project(shaderc STATIC
