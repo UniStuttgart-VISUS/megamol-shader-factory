@@ -7,7 +7,15 @@
 
 #include "shaderc/shaderc.hpp"
 
+#include "utils.h"
+
 namespace megamol::shaderfactory {
+
+inline void default_delete_include_result(shaderc_include_result* data) {
+    safe_delete_array(data->content);
+    safe_delete_array(data->source_name);
+    safe_delete(data->user_data);
+}
 
 class includer final : public shaderc::CompileOptions::IncluderInterface {
 public:

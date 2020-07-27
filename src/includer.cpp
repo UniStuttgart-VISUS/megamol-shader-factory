@@ -7,6 +7,7 @@
 megamol::shaderfactory::includer::includer(std::filesystem::path const& shader_include_path)
     : shader_include_path_(shader_include_path) {}
 
+
 shaderc_include_result* megamol::shaderfactory::includer::GetInclude(
     const char* requested_source, shaderc_include_type type, const char* requesting_source, size_t include_depth) {
     auto const requested = std::filesystem::path(requested_source);
@@ -58,7 +59,5 @@ shaderc_include_result* megamol::shaderfactory::includer::GetInclude(
 
 
 void megamol::shaderfactory::includer::ReleaseInclude(shaderc_include_result* data) {
-    safe_delete_array(data->content);
-    safe_delete_array(data->source_name);
-    safe_delete_array(data->user_data);
+    default_delete_include_result(data);
 }
