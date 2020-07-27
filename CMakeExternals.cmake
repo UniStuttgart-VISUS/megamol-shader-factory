@@ -27,7 +27,7 @@ function(require_external NAME)
 
     add_external_project(shaderc STATIC
       GIT_REPOSITORY https://github.com/google/shaderc.git
-      GIT_TAG "v2019.1"
+      GIT_TAG "v2020.2"
       BUILD_BYPRODUCTS "<INSTALL_DIR>/${SHADERC_LIB}"
       PATCH_COMMAND ${CMAKE_COMMAND} -D SOURCE_DIR=<SOURCE_DIR> -D GIT_EXECUTABLE=${GIT_EXECUTABLE} -P "${CMAKE_SOURCE_DIR}/cmake/shaderc/deps.cmake"
       CMAKE_ARGS
