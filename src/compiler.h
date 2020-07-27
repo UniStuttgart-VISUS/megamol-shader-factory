@@ -20,6 +20,9 @@ public:
 
     ~compiler() {}
 
+    [[nodiscard]] std::string preprocess(
+        std::filesystem::path const& shader_source_path, shaderc::CompileOptions const& options) const;
+
 private:
     static shaderc_shader_kind parse_type_string(std::string const& shader_type) {
         if (shader_type == ".vert") {
@@ -31,19 +34,19 @@ private:
         }
 
         if (shader_type == ".tese") {
-            return shaderc_tess_control_shader;
+            return shaderc_tess_evaluation_shader;
         }
 
         if (shader_type == ".geom") {
-            return shaderc_tess_control_shader;
+            return shaderc_geometry_shader;
         }
 
         if (shader_type == ".frag") {
-            return shaderc_tess_control_shader;
+            return shaderc_fragment_shader;
         }
 
         if (shader_type == ".comp") {
-            return shaderc_tess_control_shader;
+            return shaderc_compute_shader;
         }
 
         return shaderc_glsl_infer_from_source;
@@ -61,8 +64,6 @@ private:
 
         return content;
     }
-
-    [[nodiscard]] std::string preprocess(std::filesystem::path const& shader_source_path) const;
 
     shaderc::Compiler compiler_;
 
