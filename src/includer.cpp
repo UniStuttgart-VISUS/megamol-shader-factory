@@ -8,6 +8,22 @@ megamol::shaderfactory::includer::includer(std::filesystem::path const& shader_i
     : shader_include_path_(shader_include_path) {}
 
 
+void read_include(shaderc_include_result* res, std::filesystem::path const& search_path) {
+    auto fsize = std::filesystem::file_size(search_path);
+    std::ifstream file(search_path);
+    auto shader_source = new char[fsize];
+    file.read(shader_source, fsize);
+    res->content = shader_source;
+    res->content_length = fsize;
+    file.close();
+    auto sp_str = search_path.string();
+    auto req_path = new char[sp_str.size()];
+    std::copy(sp_str.cbegin(), sp_str.cend(), req_path);
+    res->source_name = req_path;
+    res->source_name_length = sp_str.size();
+}
+
+
 shaderc_include_result* megamol::shaderfactory::includer::GetInclude(
     const char* requested_source, shaderc_include_type type, const char* requesting_source, size_t include_depth) {
     auto const requested = std::filesystem::path(requested_source);
@@ -22,35 +38,13 @@ shaderc_include_result* megamol::shaderfactory::includer::GetInclude(
     auto res = new shaderc_include_result{0};
 
     if (std::filesystem::exists(search_path)) {
-        auto fsize = std::filesystem::file_size(search_path);
-        std::ifstream file(search_path);
-        auto shader_source = new char[fsize];
-        file.read(shader_source, fsize);
-        res->content = shader_source;
-        res->content_length = fsize;
-        file.close();
-        auto sp_str = search_path.string();
-        auto req_path = new char[sp_str.size()];
-        std::copy(sp_str.cbegin(), sp_str.cend(), req_path);
-        res->source_name = req_path;
-        res->source_name_length = sp_str.size();
+        read_include(res, search_path);
         return res;
     }
 
     search_path = shader_include_path_.append(search_name.c_str());
     if (std::filesystem::exists(search_path)) {
-        auto fsize = std::filesystem::file_size(search_path);
-        std::ifstream file(search_path);
-        auto shader_source = new char[fsize];
-        file.read(shader_source, fsize);
-        res->content = shader_source;
-        res->content_length = fsize;
-        file.close();
-        auto sp_str = search_path.string();
-        auto req_path = new char[sp_str.size()];
-        std::copy(sp_str.cbegin(), sp_str.cend(), req_path);
-        res->source_name = req_path;
-        res->source_name_length = sp_str.size();
+        read_include(res, search_path);
         return res;
     }
 
