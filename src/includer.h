@@ -7,7 +7,7 @@
 
 #include "shaderc/shaderc.hpp"
 
-#include "utils.h"
+#include "msf/utils.h"
 
 namespace megamol::shaderfactory {
 
