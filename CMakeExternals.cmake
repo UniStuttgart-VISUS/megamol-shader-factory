@@ -13,8 +13,8 @@ include("${CMAKE_BINARY_DIR}/script-externals/cmake/External.cmake")
 function(require_external NAME)
   set(FETCHCONTENT_QUIET ON CACHE BOOL "")
 
-  if(NAME STREQUAL "shaderc")
-    if(TARGET shaderc)
+  if(NAME STREQUAL "shaderc_combined")
+    if(TARGET shaderc_combined)
       return()
     endif()
 
@@ -25,7 +25,7 @@ function(require_external NAME)
       set(SHADERC_LIB "${CMAKE_INSTALL_LIBDIR}/libshaderc_combined.a")
     endif()
 
-    add_external_project(shaderc STATIC
+    add_external_project(shaderc_combined STATIC
       GIT_REPOSITORY https://github.com/google/shaderc.git
       GIT_TAG "v2020.2"
       BUILD_BYPRODUCTS "<INSTALL_DIR>/${SHADERC_LIB}"
@@ -33,7 +33,7 @@ function(require_external NAME)
       CMAKE_ARGS
         -DSHADERC_SKIP_TESTS=ON)
 
-    add_external_library(shaderc
+    add_external_library(shaderc_combined
       LIBRARY ${SHADERC_LIB})
   else()
     message(FATAL_ERROR "Unknown external required \"${NAME}\"")

@@ -20,7 +20,7 @@ include("CMakeExternals.cmake")
 add_subdirectory(glad)
 
 # Add externals
-require_external(shaderc)
+require_external(shaderc_combined)
 
 # Collect source files
 file(GLOB_RECURSE public_header_files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "include/*.h" "include/*.inl")
@@ -43,7 +43,7 @@ set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_EXTENSIONS OFF)
 target_include_directories(${PROJECT_NAME}
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> "src" "include")
-target_link_libraries(${PROJECT_NAME} PUBLIC shaderc glad)
+target_link_libraries(${PROJECT_NAME} PUBLIC shaderc_combined glad)
 
 # Source groups in Visual Studio
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER base)
@@ -74,7 +74,7 @@ if(WIN32)
 else()
   install(TARGETS ${PROJECT_NAME} DESTINATION "lib" EXPORT ${PROJECT_NAME}-target)
 endif()
-get_target_property(shaderc_include shaderc INTERFACE_INCLUDE_DIRECTORIES)
+get_target_property(shaderc_include shaderc_combined INTERFACE_INCLUDE_DIRECTORIES)
 install(DIRECTORY ${shaderc_include}/shaderc DESTINATION ${CMAKE_INSTALL_PREFIX} FILES_MATCHING PATTERN "*.h*")
 
 if (BUILD_MSF_TEST)
