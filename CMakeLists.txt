@@ -74,6 +74,8 @@ if(WIN32)
 else()
   install(TARGETS ${PROJECT_NAME} DESTINATION "lib" EXPORT ${PROJECT_NAME}-target)
 endif()
+get_target_property(shaderc_include shaderc INTERFACE_INCLUDE_DIRECTORIES)
+install(DIRECTORY ${shaderc_include}/shaderc DESTINATION ${CMAKE_INSTALL_PREFIX} FILES_MATCHING PATTERN "*.h*")
 
 if (BUILD_MSF_TEST)
   add_executable(mmshader_test test/main.cpp)
