@@ -5,8 +5,8 @@
 
 #include "shaderc/shaderc.hpp"
 
-#include "includer.h"
-#include "includer_dispatch.h"
+#include "msf/includer.h"
+#include "msf/includer_dispatch.h"
 
 namespace megamol::shaderfactory {
 

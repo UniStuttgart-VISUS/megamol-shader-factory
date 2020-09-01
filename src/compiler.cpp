@@ -1,6 +1,6 @@
 #include "msf/compiler.h"
 
-#include "includer.h"
+#include "msf/includer.h"
 
 std::string megamol::shaderfactory::compiler::preprocess(
     std::filesystem::path const& shader_source_path, shaderc::CompileOptions const& options) const {
