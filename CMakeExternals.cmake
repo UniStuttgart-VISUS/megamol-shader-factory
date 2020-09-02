@@ -31,7 +31,8 @@ function(require_external NAME)
       BUILD_BYPRODUCTS "<INSTALL_DIR>/${SHADERC_LIB}"
       PATCH_COMMAND ${CMAKE_COMMAND} -D SOURCE_DIR=<SOURCE_DIR> -D GIT_EXECUTABLE=${GIT_EXECUTABLE} -P "${CMAKE_SOURCE_DIR}/cmake/shaderc/deps.cmake"
       CMAKE_ARGS
-        -DSHADERC_SKIP_TESTS=ON)
+        -DSHADERC_SKIP_TESTS=ON
+        -DSHADERC_ENABLE_SHARED_CRT=ON)
 
     add_external_library(shaderc_combined
       LIBRARY ${SHADERC_LIB}      
