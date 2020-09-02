@@ -43,7 +43,7 @@ set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_EXTENSIONS OFF)
 target_include_directories(${PROJECT_NAME}
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> "src" "include")
-target_link_libraries(${PROJECT_NAME} PUBLIC shaderc_combined glad)
+target_link_libraries(${PROJECT_NAME} PRIVATE shaderc_combined glad)
 
 # Source groups in Visual Studio
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER base)
@@ -76,6 +76,9 @@ else()
 endif()
 get_target_property(shaderc_include shaderc_combined INTERFACE_INCLUDE_DIRECTORIES)
 install(DIRECTORY ${shaderc_include}/shaderc DESTINATION ${CMAKE_INSTALL_PREFIX} FILES_MATCHING PATTERN "*.h*")
+get_target_property(shaderc_lib shaderc_combined INTERFACE_LINK_LIBRARIES)
+external_get_property(shaderc_combined INSTALL_DIR)
+install(FILES ${INSTALL_DIR}/${shaderc_lib} DESTINATION "lib")
 
 if (BUILD_MSF_TEST)
   add_executable(mmshader_test test/main.cpp)

@@ -34,7 +34,8 @@ function(require_external NAME)
         -DSHADERC_SKIP_TESTS=ON)
 
     add_external_library(shaderc_combined
-      LIBRARY ${SHADERC_LIB})
+      LIBRARY ${SHADERC_LIB}      
+      INTERFACE_LIBRARIES "${SHADERC_LIB}")
   else()
     message(FATAL_ERROR "Unknown external required \"${NAME}\"")
   endif()
