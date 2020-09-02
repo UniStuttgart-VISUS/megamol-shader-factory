@@ -44,7 +44,7 @@ private:
     std::mutex compiler_lock_;
 };
 
-shaderc_shader_kind parse_type_string(std::string const& shader_type) {
+inline shaderc_shader_kind parse_type_string(std::string const& shader_type) {
     if (shader_type == ".vert") {
         return shaderc_vertex_shader;
     }
@@ -72,7 +72,7 @@ shaderc_shader_kind parse_type_string(std::string const& shader_type) {
     return shaderc_glsl_infer_from_source;
 }
 
-GLenum parse_type_string(shaderc_shader_kind const& shader_type) {
+inline GLenum parse_type_string(shaderc_shader_kind const& shader_type) {
     if (shader_type == shaderc_vertex_shader) {
         return GL_VERTEX_SHADER;
     }
@@ -100,13 +100,13 @@ GLenum parse_type_string(shaderc_shader_kind const& shader_type) {
     return 0;
 }
 
-shaderc_shader_kind get_shader_type_sc(std::filesystem::path const& shader_source_path) {
+inline shaderc_shader_kind get_shader_type_sc(std::filesystem::path const& shader_source_path) {
     auto const shader_type_string = shader_source_path.stem().extension().string();
 
     return parse_type_string(shader_type_string);
 }
 
-GLenum get_shader_type_ogl(std::filesystem::path const& shader_source_path) {
+inline GLenum get_shader_type_ogl(std::filesystem::path const& shader_source_path) {
     return parse_type_string(get_shader_type_sc(shader_source_path));
 }
 
