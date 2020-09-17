@@ -1,3 +1,8 @@
+/*
+ * compiler_options.h
+ *
+ * Copyright (C) 2020 by Universitaet Stuttgart (VISUS). Alle Rechte vorbehalten.
+ */
 #pragma once
 
 #include <filesystem>

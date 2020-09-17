@@ -1,3 +1,8 @@
+/*
+ * includer_dispatch.h
+ *
+ * Copyright (C) 2020 by Universitaet Stuttgart (VISUS). Alle Rechte vorbehalten.
+ */
 #include "msf/includer_dispatch.h"
 
 

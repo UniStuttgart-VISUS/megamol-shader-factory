@@ -1,3 +1,8 @@
+/*
+ * compiler.cpp
+ *
+ * Copyright (C) 2020 by Universitaet Stuttgart (VISUS). Alle Rechte vorbehalten.
+ */
 #include "msf/compiler.h"
 
 #include "msf/includer.h"

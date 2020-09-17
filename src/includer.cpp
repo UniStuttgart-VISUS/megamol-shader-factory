@@ -1,3 +1,8 @@
+/*
+ * includer.cpp
+ *
+ * Copyright (C) 2020 by Universitaet Stuttgart (VISUS). Alle Rechte vorbehalten.
+ */
 #include "msf/includer.h"
 #include "msf/utils.h"
 
