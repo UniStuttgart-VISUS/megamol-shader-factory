@@ -31,6 +31,8 @@ public:
      * Set include paths. Overrides previously set paths.
      */
     void set_include_paths(std::vector<std::filesystem::path> const& paths) {
+        shader_paths_ = paths;
+
         if (paths.size() == 0) return;
         if (paths.size() == 1) {
             options_.SetIncluder(std::make_unique<includer>(paths[0]));
@@ -48,8 +50,12 @@ public:
 
     operator shaderc::CompileOptions const &() const { return options_; }
 
+    std::vector<std::filesystem::path> const& get_shader_paths() const { return shader_paths_; }
+
 private:
     shaderc::CompileOptions options_;
+
+    std::vector<std::filesystem::path> shader_paths_;
 }; // end class compiler_options
 
 } // end namespace megamol::shaderfactory

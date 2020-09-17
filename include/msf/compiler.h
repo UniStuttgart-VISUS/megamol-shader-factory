@@ -8,6 +8,8 @@
 
 #include "glad/glad.h"
 
+#include "msf/compiler_options.h"
+
 namespace megamol::shaderfactory {
 
 class compiler {
@@ -23,7 +25,7 @@ public:
     ~compiler() {}
 
     [[nodiscard]] std::string preprocess(
-        std::filesystem::path const& shader_source_path, shaderc::CompileOptions const& options) const;
+        std::filesystem::path const& shader_source_path, compiler_options const& options) const;
 
 private:
     static std::string read_shader_source(std::filesystem::path const& shader_source_path) {
