@@ -11,7 +11,7 @@ std::string megamol::shaderfactory::compiler::preprocess(
         bool found_path = false;
         for (auto const& el : options.get_shader_paths()) {
             auto final_shader_source_path = el;
-            final_shader_source_path += shader_source_path;
+            final_shader_source_path /= shader_source_path;
             if (std::filesystem::exists(final_shader_source_path)) {
                 if (found_path) {
                     return std::string();
