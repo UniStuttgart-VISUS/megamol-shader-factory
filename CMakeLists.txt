@@ -20,7 +20,7 @@ include("CMakeExternals.cmake")
 add_subdirectory(glad)
 
 # Add externals
-require_external(shaderc_combined)
+require_external(glslang)
 
 # Collect source files
 file(GLOB_RECURSE public_header_files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "include/*.h" "include/*.inl")
@@ -42,7 +42,7 @@ set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_EXTENSIONS OFF)
 target_include_directories(${PROJECT_NAME}
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> "src" "include")
-target_link_libraries(${PROJECT_NAME} PRIVATE shaderc_combined glad)
+target_link_libraries(${PROJECT_NAME} PRIVATE glslang glad)
 
 # Source groups in Visual Studio
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER base)
@@ -73,11 +73,11 @@ if(WIN32)
 else()
   install(TARGETS ${PROJECT_NAME} DESTINATION "lib" EXPORT ${PROJECT_NAME}-target)
 endif()
-get_target_property(shaderc_include shaderc_combined INTERFACE_INCLUDE_DIRECTORIES)
-install(DIRECTORY ${shaderc_include}/shaderc DESTINATION ${CMAKE_INSTALL_PREFIX} FILES_MATCHING PATTERN "*.h*")
-get_target_property(shaderc_lib shaderc_combined INTERFACE_LINK_LIBRARIES)
-external_get_property(shaderc_combined INSTALL_DIR)
-install(FILES ${INSTALL_DIR}/${shaderc_lib} DESTINATION "lib")
+# get_target_property(glslang_include glslang INTERFACE_INCLUDE_DIRECTORIES)
+# install(DIRECTORY ${glslang_include}/glslang DESTINATION ${CMAKE_INSTALL_PREFIX} FILES_MATCHING PATTERN "*.h*")
+# get_target_property(glslang_lib glslang INTERFACE_LINK_LIBRARIES)
+# external_get_property(glslang INSTALL_DIR)
+# install(FILES ${INSTALL_DIR}/${glslang_lib} DESTINATION "lib")
 
 if (BUILD_MSF_TEST)
   add_executable(mmshader_test test/main.cpp)

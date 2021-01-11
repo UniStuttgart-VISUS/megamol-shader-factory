@@ -13,30 +13,39 @@ include("${CMAKE_BINARY_DIR}/script-externals/cmake/External.cmake")
 function(require_external NAME)
   set(FETCHCONTENT_QUIET ON CACHE BOOL "")
 
-  if(NAME STREQUAL "shaderc_combined")
-    if(TARGET shaderc_combined)
+  if(NAME STREQUAL "glslang")
+    if(TARGET glslang)
       return()
     endif()
 
     if(WIN32)
-      set(SHADERC_LIB "lib/shaderc_combined.lib")
+      set(GLSLANG_LIB "lib/glslang.lib")
     else()
       include(GNUInstallDirs)
-      set(SHADERC_LIB "${CMAKE_INSTALL_LIBDIR}/libshaderc_combined.a")
+      set(GLSLANG_LIB "${CMAKE_INSTALL_LIBDIR}/glslang.a")
     endif()
 
-    add_external_project(shaderc_combined STATIC
-      GIT_REPOSITORY https://github.com/google/shaderc.git
-      GIT_TAG "v2020.2"
-      BUILD_BYPRODUCTS "<INSTALL_DIR>/${SHADERC_LIB}"
-      PATCH_COMMAND ${CMAKE_COMMAND} -D SOURCE_DIR=<SOURCE_DIR> -D GIT_EXECUTABLE=${GIT_EXECUTABLE} -P "${CMAKE_SOURCE_DIR}/cmake/shaderc/deps.cmake"
+    add_external_project(glslang STATIC
+      GIT_REPOSITORY https://github.com/KhronosGroup/glslang.git
+      GIT_TAG "11.1.0"
+      BUILD_BYPRODUCTS "<INSTALL_DIR>/${GLSLANG_LIB}"
       CMAKE_ARGS
-        -DSHADERC_SKIP_TESTS=ON
-        -DSHADERC_ENABLE_SHARED_CRT=ON)
+        -DBUILD_EXTERNAL=OFF
+        -DBUILD_SHARED_LIBS=OFF
+        -DBUILD_TESTING=OFF
+        -DENABLE_CTEST=OFF
+        -DENABLE_EXCEPTIONS=ON
+        -DENABLE_GLSLANG_BINARIES=OFF
+        -DENABLE_GLSLANG_JS=OFF
+        -DENABLE_HLSL=OFF
+        -DENABLE_OPT=OFF
+        -DENABLE_PCH=OFF
+        -DENABLE_RTTI=ON
+        -DENABLE_SPVREMAPPER=OFF)
 
-    add_external_library(shaderc_combined
-      LIBRARY ${SHADERC_LIB}      
-      INTERFACE_LIBRARIES "${SHADERC_LIB}")
+    add_external_library(glslang
+      LIBRARY ${GLSLANG_LIB}      
+      INTERFACE_LIBRARIES "${GLSLANG_LIB}")
   else()
     message(FATAL_ERROR "Unknown external required \"${NAME}\"")
   endif()
