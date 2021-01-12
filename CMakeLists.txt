@@ -17,7 +17,9 @@ find_package(Git)
 # External
 include("CMakeExternals.cmake")
 
-add_subdirectory(glad)
+set(GLAD_PATH "." CACHE PATH "Path to glad install dir")
+set(GLAD_INCLUDE "${GLAD_PATH}/include")
+set(GLAD_LIB_PATH "${GLAD_PATH}/lib")
 
 # Add externals
 require_external(glslang)
@@ -40,9 +42,11 @@ else()
 endif()
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_EXTENSIONS OFF)
+target_link_directories(${PROJECT_NAME} PUBLIC ${GLAD_LIB_PATH})
+target_link_libraries(${PROJECT_NAME} PUBLIC glslang::glslang glslang::genericcodegen glslang::machineindependent glslang::osdependent glslang::oglcompiler glad)
+external_get_property(glslang INSTALL_DIR)
 target_include_directories(${PROJECT_NAME}
-    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> "src" "include")
-target_link_libraries(${PROJECT_NAME} PRIVATE glslang glad)
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> "src" "include" ${INSTALL_DIR}/include ${GLAD_INCLUDE})
 
 # Source groups in Visual Studio
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER base)
@@ -73,11 +77,8 @@ if(WIN32)
 else()
   install(TARGETS ${PROJECT_NAME} DESTINATION "lib" EXPORT ${PROJECT_NAME}-target)
 endif()
-# get_target_property(glslang_include glslang INTERFACE_INCLUDE_DIRECTORIES)
-# install(DIRECTORY ${glslang_include}/glslang DESTINATION ${CMAKE_INSTALL_PREFIX} FILES_MATCHING PATTERN "*.h*")
-# get_target_property(glslang_lib glslang INTERFACE_LINK_LIBRARIES)
-# external_get_property(glslang INSTALL_DIR)
-# install(FILES ${INSTALL_DIR}/${glslang_lib} DESTINATION "lib")
+install(DIRECTORY ${INSTALL_DIR}/include/ DESTINATION "include")
+install(DIRECTORY ${INSTALL_DIR}/lib/ DESTINATION "lib")
 
 if (BUILD_MSF_TEST)
   add_executable(mmshader_test test/main.cpp)

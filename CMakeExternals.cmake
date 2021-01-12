@@ -19,16 +19,27 @@ function(require_external NAME)
     endif()
 
     if(WIN32)
-      set(GLSLANG_LIB "lib/glslang.lib")
+      set(GLSLANG_LIB "lib/glslang<SUFFIX>.lib")
+      set(GENERICCODEGEN_LIB "lib/GenericCodeGen<SUFFIX>.lib")
+      set(MACHINEINDEPENDENT_LIB "lib/MachineIndependent<SUFFIX>.lib")
+      set(OSDEPENDENT_LIB "lib/OSDependent<SUFFIX>.lib")
+      set(OGLCOMPILER_LIB "lib/OGLCompiler<SUFFIX>.lib")
+      set(SPIRV_LIB "lib/SPIRV<SUFFIX>.lib")
     else()
       include(GNUInstallDirs)
-      set(GLSLANG_LIB "${CMAKE_INSTALL_LIBDIR}/glslang.a")
+      set(GLSLANG_LIB "${CMAKE_INSTALL_LIBDIR}/libglslang<SUFFIX>.a")
+      set(GENERICCODEGEN_LIB "lib/libGenericCodeGen<SUFFIX>.a")
+      set(MACHINEINDEPENDENT_LIB "lib/libMachineIndependent<SUFFIX>.a")
+      set(OSDEPENDENT_LIB "lib/libOSDependent<SUFFIX>.a")
+      set(OGLCOMPILER_LIB "lib/libOGLCompiler<SUFFIX>.a")
+      set(SPIRV_LIB "lib/libSPIRV<SUFFIX>.a")
     endif()
 
     add_external_project(glslang STATIC
       GIT_REPOSITORY https://github.com/KhronosGroup/glslang.git
       GIT_TAG "11.1.0"
-      BUILD_BYPRODUCTS "<INSTALL_DIR>/${GLSLANG_LIB}"
+      BUILD_BYPRODUCTS "<INSTALL_DIR>/${GLSLANG_LIB}" "<INSTALL_DIR>/${GENERICCODEGEN_LIB}" "<INSTALL_DIR>/${MACHINEINDEPENDENT_LIB}" "<INSTALL_DIR>/${OSDEPENDENT_LIB}" "<INSTALL_DIR>/${OGLCOMPILER_LIB}" "<INSTALL_DIR>/${SPIRV_LIB}"
+      DEBUG_SUFFIX "d"
       CMAKE_ARGS
         -DBUILD_EXTERNAL=OFF
         -DBUILD_SHARED_LIBS=OFF
@@ -43,9 +54,30 @@ function(require_external NAME)
         -DENABLE_RTTI=ON
         -DENABLE_SPVREMAPPER=OFF)
 
-    add_external_library(glslang
-      LIBRARY ${GLSLANG_LIB}      
-      INTERFACE_LIBRARIES "${GLSLANG_LIB}")
+    add_external_library(glslang::glslang
+      PROJECT glslang
+      LIBRARY ${GLSLANG_LIB}
+      DEBUG_SUFFIX "d")
+    add_external_library(glslang::genericcodegen
+      PROJECT glslang
+      LIBRARY ${GENERICCODEGEN_LIB}
+      DEBUG_SUFFIX "d")
+    add_external_library(glslang::machineindependent
+      PROJECT glslang
+      LIBRARY ${MACHINEINDEPENDENT_LIB}
+      DEBUG_SUFFIX "d")
+    add_external_library(glslang::osdependent
+      PROJECT glslang
+      LIBRARY ${OSDEPENDENT_LIB}
+      DEBUG_SUFFIX "d")
+    add_external_library(glslang::oglcompiler
+      PROJECT glslang
+      LIBRARY ${OGLCOMPILER_LIB}
+      DEBUG_SUFFIX "d")
+    add_external_library(glslang::spirv
+      PROJECT glslang
+      LIBRARY ${SPIRV_LIB}
+      DEBUG_SUFFIX "d")
   else()
     message(FATAL_ERROR "Unknown external required \"${NAME}\"")
   endif()
