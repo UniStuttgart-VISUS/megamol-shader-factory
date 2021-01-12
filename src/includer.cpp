@@ -1,7 +1,7 @@
 /*
  * includer.cpp
  *
- * Copyright (C) 2020 by Universitaet Stuttgart (VISUS). Alle Rechte vorbehalten.
+ * Copyright (C) 2020-2021 by Universitaet Stuttgart (VISUS). Alle Rechte vorbehalten.
  */
 #include "msf/includer.h"
 #include "msf/utils.h"
@@ -9,54 +9,35 @@
 #include <fstream>
 
 
-megamol::shaderfactory::includer::includer(std::filesystem::path const& shader_include_path)
-    : shader_include_path_(shader_include_path) {}
+megamol::shaderfactory::includer::includer(std::vector<std::filesystem::path> const& shader_include_paths)
+    : shader_include_paths_(shader_include_paths) {}
 
 
-void read_include(shaderc_include_result* res, std::filesystem::path const& search_path) {
+glslang::TShader::Includer::IncludeResult* read_include(std::filesystem::path const& search_path) {
     auto fsize = std::filesystem::file_size(search_path);
     std::ifstream file(search_path);
     auto shader_source = new char[fsize];
     file.read(shader_source, fsize);
-    res->content = shader_source;
-    res->content_length = fsize;
-    file.close();
-    auto sp_str = search_path.string();
-    auto req_path = new char[sp_str.size()];
-    std::copy(sp_str.cbegin(), sp_str.cend(), req_path);
-    res->source_name = req_path;
-    res->source_name_length = sp_str.size();
+    return new glslang::TShader::Includer::IncludeResult(std::filesystem::canonical(search_path).string(), shader_source, fsize, nullptr);
 }
 
 
-shaderc_include_result* megamol::shaderfactory::includer::GetInclude(
-    const char* requested_source, shaderc_include_type type, const char* requesting_source, size_t include_depth) {
-    auto const requested = std::filesystem::path(requested_source);
-    auto const current_shader_path = std::filesystem::path(requesting_source);
-
-    auto current_shader_base = current_shader_path;
-    current_shader_base.remove_filename();
-
-    auto search_name = requested.filename();
-    auto search_path = current_shader_base.append(search_name.c_str());
-
-    auto res = new shaderc_include_result{0};
-
-    if (std::filesystem::exists(search_path)) {
-        read_include(res, search_path);
-        return res;
+glslang::TShader::Includer::IncludeResult* megamol::shaderfactory::includer::includeSystem(
+    const char* header_name, const char* includer_name, size_t inclusion_depth) {
+    for (auto const& el : shader_include_paths_) {
+        auto search_path = el;
+        search_path /= header_name;
+        if (std::filesystem::exists(search_path)) {
+            return read_include(search_path);
+        }
     }
-
-    search_path = shader_include_path_.append(search_name.c_str());
-    if (std::filesystem::exists(search_path)) {
-        read_include(res, search_path);
-        return res;
-    }
-
-    return res;
+    return nullptr;
 }
 
 
-void megamol::shaderfactory::includer::ReleaseInclude(shaderc_include_result* data) {
-    default_delete_include_result(data);
+void megamol::shaderfactory::includer::releaseInclude(glslang::TShader::Includer::IncludeResult* data) {
+    if (data != nullptr) {
+        safe_delete_array(data->headerData);
+        safe_delete(data->userData);
+    }
 }
