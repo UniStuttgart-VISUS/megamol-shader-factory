@@ -17,6 +17,7 @@ find_package(Git)
 # External
 include("CMakeExternals.cmake")
 
+option(GLAD_IS_SHARED "GLAD_IS_SHARED" OFF)
 set(GLAD_PATH "." CACHE PATH "Path to glad install dir")
 set(GLAD_INCLUDE "${GLAD_PATH}/include")
 set(GLAD_LIB_PATH "${GLAD_PATH}/lib")
@@ -43,10 +44,13 @@ endif()
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_EXTENSIONS OFF)
 target_link_directories(${PROJECT_NAME} PUBLIC ${GLAD_LIB_PATH})
-target_link_libraries(${PROJECT_NAME} PUBLIC glslang::glslang glslang::genericcodegen glslang::machineindependent glslang::osdependent glslang::oglcompiler glad)
+target_link_libraries(${PROJECT_NAME} PUBLIC glslang::glslang glslang::genericcodegen glslang::machineindependent glslang::osdependent glslang::oglcompiler)
 external_get_property(glslang INSTALL_DIR)
 target_include_directories(${PROJECT_NAME}
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> "src" "include" ${INSTALL_DIR}/include ${GLAD_INCLUDE})
+if (GLAD_IS_SHARED)
+  target_compile_definitions(${PROJECT_NAME} PUBLIC GLAD_GLAPI_EXPORT)
+endif()
 
 # Source groups in Visual Studio
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER base)
