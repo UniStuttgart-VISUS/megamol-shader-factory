@@ -40,7 +40,7 @@ std::tuple<bool, int, EProfile> find_and_parse_version_string(std::string const&
 
 
 std::string megamol::shaderfactory::compiler::preprocess(
-    std::filesystem::path const& shader_source_path, compiler_options& options) const {
+    std::filesystem::path const& shader_source_path, compiler_options const& options) const {
     std::filesystem::path final_shader_source_path;
     if (std::filesystem::exists(shader_source_path)) {
         final_shader_source_path = shader_source_path;
@@ -88,9 +88,10 @@ std::string megamol::shaderfactory::compiler::preprocess(
         return std::string();
     }
 
+    auto inc = options.get_includer();
     std::string output;
     auto const success = shader.preprocess(
-        options.get_resource_limits(), version, profile, true, false, EShMsgDefault, &output, options.get_includer());
+        options.get_resource_limits(), version, profile, true, false, EShMsgDefault, &output, inc);
 
     auto version_pos = output.find("#version");
     auto version_end = output.find_first_of('\n', version_pos) + 1;

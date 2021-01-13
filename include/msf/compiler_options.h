@@ -190,7 +190,7 @@ public:
 
     TBuiltInResource const* get_resource_limits() const { return &resource_limits_; }
 
-    includer& get_includer() { return includer_; }
+    includer get_includer() const { return includer_; }
 
 private:
     void add_vendor_definition();
