@@ -1,7 +1,7 @@
 /*
  * includer.h
  *
- * Copyright (C) 2020 by Universitaet Stuttgart (VISUS). Alle Rechte vorbehalten.
+ * Copyright (C) 2020-2021 by Universitaet Stuttgart (VISUS). Alle Rechte vorbehalten.
  */
 #pragma once
 
@@ -10,33 +10,24 @@
 #include <string>
 #include <vector>
 
-#include "shaderc/shaderc.hpp"
+#include "glslang/Public/ShaderLang.h"
 
 #include "msf/utils.h"
 
 namespace megamol::shaderfactory {
 
-inline void default_delete_include_result(shaderc_include_result* data) {
-    safe_delete_array(data->content);
-    safe_delete_array(data->source_name);
-    safe_delete(data->user_data);
-}
-
-class includer final : public shaderc::CompileOptions::IncluderInterface {
+class includer final : public glslang::TShader::Includer {
 public:
-    includer(std::filesystem::path const& shader_include_path);
+    includer(std::vector<std::filesystem::path> const& shader_include_paths);
 
-    // Handles shaderc_include_resolver_fn callbacks.
-    shaderc_include_result* GetInclude(const char* requested_source, shaderc_include_type type,
-        const char* requesting_source, size_t include_depth) override;
+    IncludeResult* includeSystem(const char* header_name, const char* includer_name, size_t inclusion_depth) override;
 
-    // Handles shaderc_include_result_release_fn callbacks.
-    void ReleaseInclude(shaderc_include_result* data) override;
+    void releaseInclude(IncludeResult* inc_res) override;
 
     virtual ~includer() = default;
 
 private:
-    std::filesystem::path shader_include_path_;
+    std::vector<std::filesystem::path> shader_include_paths_;
 };
 
 } // end namespace megamol::shaderfactory
