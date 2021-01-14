@@ -5,6 +5,8 @@
  */
 #include "msf/compiler_options.h"
 
+#include <algorithm>
+
 #include "glad/glad.h"
 
 void megamol::shaderfactory::compiler_options::add_vendor_definition() {
