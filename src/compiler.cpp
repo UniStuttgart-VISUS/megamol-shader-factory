@@ -7,7 +7,9 @@
 
 #include "msf/includer.h"
 
+#include <algorithm>
 #include <sstream>
+#include <string>
 #include <tuple>
 
 /*
