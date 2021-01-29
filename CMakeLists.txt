@@ -44,7 +44,7 @@ endif()
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_EXTENSIONS OFF)
 target_link_directories(${PROJECT_NAME} PUBLIC ${GLAD_LIB_PATH})
-target_link_libraries(${PROJECT_NAME} PUBLIC glslang::glslang glslang::genericcodegen glslang::machineindependent glslang::osdependent glslang::oglcompiler)
+target_link_libraries(${PROJECT_NAME} PUBLIC glslang::glslang glslang::machineindependent glslang::oglcompiler glslang::osdependent glslang::genericcodegen)
 external_get_property(glslang INSTALL_DIR)
 target_include_directories(${PROJECT_NAME}
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> "src" "include" ${INSTALL_DIR}/include ${GLAD_INCLUDE})
