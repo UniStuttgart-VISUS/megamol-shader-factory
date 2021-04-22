@@ -5,6 +5,7 @@
  */
 #pragma once
 
+#include <algorithm>
 #include <filesystem>
 #include <string>
 
@@ -12,12 +13,20 @@
 
 #include "glad/glad.h"
 
+namespace {
+// from: https://en.cppreference.com/w/cpp/string/byte/tolower
+std::string str_tolower(std::string s) {
+    std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return std::tolower(c); });
+    return s;
+}
+} // namespace
+
 namespace megamol::shaderfactory {
 
 inline std::string get_shader_type_string(std::filesystem::path const& shader_source_path) {
-    std::string ext_type = std::tolower(shader_source_path.extension().string());
+    std::string ext_type = str_tolower(shader_source_path.extension().string());
     if (ext_type == ".glsl") {
-        return std::tolower(shader_source_path.stem().extension().string());
+        return str_tolower(shader_source_path.stem().extension().string());
     }
     return ext_type;
 }
