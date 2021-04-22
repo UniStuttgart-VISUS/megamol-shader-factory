@@ -17,8 +17,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 include("CMakeExternals.cmake")
 require_external(glslang)
 
-find_package(Git)
-
 # Options
 option(BUILD_MSF_TEST "BUILD_MSF_TEST" OFF)
 
