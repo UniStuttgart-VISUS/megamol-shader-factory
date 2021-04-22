@@ -150,18 +150,22 @@ struct macro {
 class compiler_options {
 public:
     compiler_options(std::vector<std::filesystem::path> const& paths)
-        : includer_(includer(paths)), resource_limits_(default_resource_limits), paths_(paths) {
+            : includer_(includer(paths)), resource_limits_(default_resource_limits), paths_(paths) {
         add_vendor_definition();
     }
 
     compiler_options(std::vector<std::filesystem::path> const& paths, std::string const& vendor)
-        : includer_(includer(paths)), resource_limits_(default_resource_limits), paths_(paths) {
+            : includer_(includer(paths)), resource_limits_(default_resource_limits), paths_(paths) {
         add_definition(vendor);
     }
 
-    void add_definition(std::string const& name) { macros_.emplace_back(name); }
+    void add_definition(std::string const& name) {
+        macros_.emplace_back(name);
+    }
 
-    void add_definition(std::string const& name, std::string const& value) { macros_.emplace_back(name, value); }
+    void add_definition(std::string const& name, std::string const& value) {
+        macros_.emplace_back(name, value);
+    }
 
     /**
      * Set include paths. Overrides previously set paths.
@@ -171,7 +175,9 @@ public:
         paths_ = paths;
     }
 
-    std::vector<std::filesystem::path> const& get_shader_paths() const { return paths_; }
+    std::vector<std::filesystem::path> const& get_shader_paths() const {
+        return paths_;
+    }
 
     std::string get_preamble() const {
         std::string preamble;
@@ -188,9 +194,13 @@ public:
         return preamble;
     }
 
-    TBuiltInResource const* get_resource_limits() const { return &resource_limits_; }
+    TBuiltInResource const* get_resource_limits() const {
+        return &resource_limits_;
+    }
 
-    includer get_includer() const { return includer_; }
+    includer get_includer() const {
+        return includer_;
+    }
 
 private:
     void add_vendor_definition();

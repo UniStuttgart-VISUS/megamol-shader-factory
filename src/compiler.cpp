@@ -92,8 +92,8 @@ std::string megamol::shaderfactory::compiler::preprocess(
 
     auto inc = options.get_includer();
     std::string output;
-    auto const success = shader.preprocess(
-        options.get_resource_limits(), version, profile, true, false, EShMsgDefault, &output, inc);
+    auto const success =
+        shader.preprocess(options.get_resource_limits(), version, profile, true, false, EShMsgDefault, &output, inc);
 
     auto version_pos = output.find("#version");
     auto version_end = output.find_first_of('\n', version_pos) + 1;

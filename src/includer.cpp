@@ -10,7 +10,7 @@
 
 
 megamol::shaderfactory::includer::includer(std::vector<std::filesystem::path> const& shader_include_paths)
-    : shader_include_paths_(shader_include_paths) {}
+        : shader_include_paths_(shader_include_paths) {}
 
 
 glslang::TShader::Includer::IncludeResult* read_include(std::filesystem::path const& search_path) {
@@ -18,7 +18,8 @@ glslang::TShader::Includer::IncludeResult* read_include(std::filesystem::path co
     std::ifstream file(search_path);
     auto shader_source = new char[fsize];
     file.read(shader_source, fsize);
-    return new glslang::TShader::Includer::IncludeResult(std::filesystem::canonical(search_path).string(), shader_source, fsize, nullptr);
+    return new glslang::TShader::Includer::IncludeResult(
+        std::filesystem::canonical(search_path).string(), shader_source, fsize, nullptr);
 }
 
 
