@@ -95,15 +95,15 @@ std::string megamol::shaderfactory::compiler::preprocess(
     auto const success =
         shader.preprocess(options.get_resource_limits(), version, profile, true, false, EShMsgDefault, &output, inc);
 
+    if (!success) {
+        throw std::runtime_error(std::string("Error preprocessing shader:\n") + shader.getInfoLog());
+    }
+
     auto version_pos = output.find("#version");
     auto version_end = output.find_first_of('\n', version_pos) + 1;
     auto version_string = output.substr(version_pos, version_end - version_pos);
     output.erase(version_pos, version_end - version_pos);
     output.insert(0, version_string);
 
-    if (success) {
-        return output;
-    }
-
-    return std::string();
+    return output;
 }
