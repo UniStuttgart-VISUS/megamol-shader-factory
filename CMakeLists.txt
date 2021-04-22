@@ -1,37 +1,38 @@
 cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
-set(CMAKE_CONFIGURATION_TYPES "Debug;Release;RelWithDebInfo" CACHE STRING "Possible Build Types" FORCE)
-
-if (NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose Release or Debug" FORCE)
-endif ()
-
-option(BUILD_MSF_TEST "BUILD_MSF_TEST" OFF)
-
+# Project
 project(megamol-shader-factory CXX)
 
+# Set a default build type if none was specified
+if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  message(STATUS "Setting build type to 'Release' as none was specified.")
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+endif ()
+
+# Modules
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
+
+# Dependencies
+include("CMakeExternals.cmake")
+require_external(glslang)
 
 find_package(Git)
 
-# External
-include("CMakeExternals.cmake")
+# Options
+option(BUILD_MSF_TEST "BUILD_MSF_TEST" OFF)
 
 option(GLAD_IS_SHARED "GLAD_IS_SHARED" OFF)
 set(GLAD_PATH "." CACHE PATH "Path to glad install dir")
 set(GLAD_INCLUDE "${GLAD_PATH}/include")
 set(GLAD_LIB_PATH "${GLAD_PATH}/lib")
 
-# Add externals
-require_external(glslang)
-
 # Collect source files
 file(GLOB_RECURSE public_header_files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "include/*.h" "include/*.inl")
 file(GLOB_RECURSE source_files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "src/*.cpp")
 file(GLOB_RECURSE header_files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "src/*.h")
-#file(GLOB_RECURSE shader_files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "Shaders/*")
-#file(GLOB_RECURSE resource_files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "Resources/*")
 
+# Library
 add_library(${PROJECT_NAME} STATIC ${public_header_files} ${header_files} ${source_files})
 if (MSVC)
   target_compile_options(${PROJECT_NAME} PRIVATE "/MP" "/arch:SSE2" "/permissive-" "/Zc:rvalueCast" "/Wall" "/MD$<$<CONFIG:Debug>:d>")
@@ -84,9 +85,9 @@ endif ()
 install(DIRECTORY ${INSTALL_DIR}/include/ DESTINATION "include")
 install(DIRECTORY ${INSTALL_DIR}/lib/ DESTINATION "lib")
 
+# Test
 if (BUILD_MSF_TEST)
   add_executable(mmshader_test test/main.cpp)
-  #target_include_directories(mmshader_test PRIVATE ${PROJECT_NAME})
   target_link_libraries(mmshader_test PRIVATE ${PROJECT_NAME})
   if (NOT WIN32)
     # Required for glslang::osdependent
