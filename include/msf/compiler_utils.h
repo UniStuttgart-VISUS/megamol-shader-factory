@@ -5,8 +5,8 @@
  */
 #pragma once
 
-#include <string>
 #include <filesystem>
+#include <string>
 
 #include "glslang/Public/ShaderLang.h"
 
@@ -15,7 +15,11 @@
 namespace megamol::shaderfactory {
 
 inline std::string get_shader_type_string(std::filesystem::path const& shader_source_path) {
-    return shader_source_path.stem().extension().string();
+    std::string ext_type = std::tolower(shader_source_path.extension().string());
+    if (ext_type == ".glsl") {
+        return std::tolower(shader_source_path.stem().extension().string());
+    }
+    return ext_type;
 }
 
 
