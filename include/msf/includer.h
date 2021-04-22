@@ -18,13 +18,13 @@ namespace megamol::shaderfactory {
 
 class includer final : public glslang::TShader::Includer {
 public:
-    includer(std::vector<std::filesystem::path> const& shader_include_paths);
+    explicit includer(std::vector<std::filesystem::path> shader_include_paths);
 
     IncludeResult* includeSystem(const char* header_name, const char* includer_name, size_t inclusion_depth) override;
 
     void releaseInclude(IncludeResult* inc_res) override;
 
-    virtual ~includer() = default;
+    ~includer() override = default;
 
 private:
     std::vector<std::filesystem::path> shader_include_paths_;

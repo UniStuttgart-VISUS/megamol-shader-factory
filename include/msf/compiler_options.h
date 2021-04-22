@@ -6,6 +6,7 @@
 #pragma once
 
 #include <filesystem>
+#include <utility>
 #include <vector>
 
 #include "glslang/Public/ShaderLang.h"
@@ -135,9 +136,9 @@ const TBuiltInResource default_resource_limits = {
 
 
 struct macro {
-    macro(std::string const& name) : name_(name) {}
+    explicit macro(std::string name) : name_(std::move(name)) {}
 
-    macro(std::string const& name, std::string val) : name_(name), val_(val) {}
+    macro(std::string name, std::string val) : name_(std::move(name)), val_(std::move(val)) {}
 
     std::string name_;
     std::string val_;
@@ -149,7 +150,7 @@ struct macro {
  */
 class compiler_options {
 public:
-    compiler_options(std::vector<std::filesystem::path> const& paths)
+    explicit compiler_options(std::vector<std::filesystem::path> const& paths)
             : includer_(includer(paths)), resource_limits_(default_resource_limits), paths_(paths) {
         add_vendor_definition();
     }

@@ -7,10 +7,11 @@
 #include "msf/utils.h"
 
 #include <fstream>
+#include <utility>
 
 
-megamol::shaderfactory::includer::includer(std::vector<std::filesystem::path> const& shader_include_paths)
-        : shader_include_paths_(shader_include_paths) {}
+megamol::shaderfactory::includer::includer(std::vector<std::filesystem::path> shader_include_paths)
+        : shader_include_paths_(std::move(shader_include_paths)) {}
 
 
 glslang::TShader::Includer::IncludeResult* read_include(std::filesystem::path const& search_path) {
