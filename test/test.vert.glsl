@@ -1,7 +1,7 @@
 #version 430
 
-#include "common.h"
-#include "common.h"
+#include "common.glsl"
+#include "common.glsl"
 
 #ifdef __AMD__
 uniform float IsAmd;
