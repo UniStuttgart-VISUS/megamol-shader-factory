@@ -49,12 +49,13 @@ std::string megamol::shaderfactory::compiler::preprocess(
     } else if (shader_source_path.is_relative()) {
         bool found_path = false;
         for (auto const& el : options.get_shader_paths()) {
-            if (std::filesystem::exists(el / shader_source_path)) {
+            auto search_path = el / shader_source_path;
+            if (std::filesystem::exists(search_path)) {
                 if (found_path) {
                     return std::string();
                 } else {
                     found_path = true;
-                    final_shader_source_path = el / shader_source_path;
+                    final_shader_source_path = search_path;
                 }
             }
         }
