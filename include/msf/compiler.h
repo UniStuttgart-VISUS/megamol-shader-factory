@@ -16,7 +16,9 @@ namespace megamol::shaderfactory {
 
 class compiler {
 public:
-    compiler() { glslang::InitializeProcess(); }
+    compiler() {
+        glslang::InitializeProcess();
+    }
 
     compiler(compiler const&) = delete;
     compiler& operator=(compiler const&) = delete;
@@ -24,7 +26,9 @@ public:
     compiler(compiler&&) = delete;
     compiler& operator=(compiler&&) = delete;
 
-    ~compiler() { glslang::FinalizeProcess(); }
+    ~compiler() {
+        glslang::FinalizeProcess();
+    }
 
     [[nodiscard]] std::string preprocess(
         std::filesystem::path const& shader_source_path, compiler_options const& options) const;

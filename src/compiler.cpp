@@ -49,13 +49,13 @@ std::string megamol::shaderfactory::compiler::preprocess(
     } else if (shader_source_path.is_relative()) {
         bool found_path = false;
         for (auto const& el : options.get_shader_paths()) {
-            final_shader_source_path = el;
-            final_shader_source_path /= shader_source_path;
-            if (std::filesystem::exists(final_shader_source_path)) {
+            auto search_path = el / shader_source_path;
+            if (std::filesystem::exists(search_path)) {
                 if (found_path) {
                     return std::string();
                 } else {
                     found_path = true;
+                    final_shader_source_path = search_path;
                 }
             }
         }
@@ -92,8 +92,12 @@ std::string megamol::shaderfactory::compiler::preprocess(
 
     auto inc = options.get_includer();
     std::string output;
-    auto const success = shader.preprocess(
-        options.get_resource_limits(), version, profile, true, false, EShMsgDefault, &output, inc);
+    auto const success =
+        shader.preprocess(options.get_resource_limits(), version, profile, true, false, EShMsgDefault, &output, inc);
+
+    if (!success) {
+        throw std::runtime_error(std::string("Error preprocessing shader:\n") + shader.getInfoLog());
+    }
 
     auto version_pos = output.find("#version");
     auto version_end = output.find_first_of('\n', version_pos) + 1;
@@ -101,9 +105,5 @@ std::string megamol::shaderfactory::compiler::preprocess(
     output.erase(version_pos, version_end - version_pos);
     output.insert(0, version_string);
 
-    if (success) {
-        return output;
-    }
-
-    return std::string();
+    return output;
 }

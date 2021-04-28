@@ -7,10 +7,11 @@
 #include "msf/utils.h"
 
 #include <fstream>
+#include <utility>
 
 
-megamol::shaderfactory::includer::includer(std::vector<std::filesystem::path> const& shader_include_paths)
-    : shader_include_paths_(shader_include_paths) {}
+megamol::shaderfactory::includer::includer(std::vector<std::filesystem::path> shader_include_paths)
+        : shader_include_paths_(std::move(shader_include_paths)) {}
 
 
 glslang::TShader::Includer::IncludeResult* read_include(std::filesystem::path const& search_path) {
@@ -18,19 +19,26 @@ glslang::TShader::Includer::IncludeResult* read_include(std::filesystem::path co
     std::ifstream file(search_path);
     auto shader_source = new char[fsize];
     file.read(shader_source, fsize);
-    return new glslang::TShader::Includer::IncludeResult(std::filesystem::canonical(search_path).string(), shader_source, fsize, nullptr);
+    return new glslang::TShader::Includer::IncludeResult(
+        std::filesystem::canonical(search_path).string(), shader_source, fsize, nullptr);
 }
 
 
 glslang::TShader::Includer::IncludeResult* megamol::shaderfactory::includer::includeSystem(
     const char* header_name, const char* includer_name, size_t inclusion_depth) {
     for (auto const& el : shader_include_paths_) {
-        auto search_path = el;
-        search_path /= header_name;
+        auto search_path = el / header_name;
         if (std::filesystem::exists(search_path)) {
             return read_include(search_path);
         }
     }
+
+    // lookup relative to includer
+    auto search_path = std::filesystem::path(includer_name).parent_path() / header_name;
+    if (std::filesystem::exists(search_path)) {
+        return read_include(search_path);
+    }
+
     return nullptr;
 }
 
