@@ -1,2 +1,6 @@
-build/**/*
-install/**/*
+build/
+install/
+cmake-build-*/
+.idea/
+.vs/
+.vscode/
