@@ -10,24 +10,24 @@
 #include <string>
 #include <vector>
 
-#include "glslang/Public/ShaderLang.h"
+#include <glslang/Public/ShaderLang.h>
 
 #include "msf/utils.h"
 
-namespace megamol::shaderfactory {
+namespace msf {
 
-class includer final : public glslang::TShader::Includer {
+class Includer final : public glslang::TShader::Includer {
 public:
-    explicit includer(std::vector<std::filesystem::path> shader_include_paths);
+    explicit Includer(std::vector<std::filesystem::path> shader_include_paths);
+
+    ~Includer() override = default;
 
     IncludeResult* includeSystem(const char* header_name, const char* includer_name, size_t inclusion_depth) override;
 
     void releaseInclude(IncludeResult* inc_res) override;
 
-    ~includer() override = default;
-
 private:
     std::vector<std::filesystem::path> shader_include_paths_;
 };
 
-} // end namespace megamol::shaderfactory
+} // namespace msf

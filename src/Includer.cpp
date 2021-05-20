@@ -3,14 +3,14 @@
  *
  * Copyright (C) 2020-2021 by Universitaet Stuttgart (VISUS). Alle Rechte vorbehalten.
  */
-#include "includer.h"
+#include "Includer.h"
 
 #include <fstream>
 #include <utility>
 
 #include "msf/utils.h"
 
-megamol::shaderfactory::includer::includer(std::vector<std::filesystem::path> shader_include_paths)
+msf::Includer::Includer(std::vector<std::filesystem::path> shader_include_paths)
         : shader_include_paths_(std::move(shader_include_paths)) {}
 
 
@@ -24,7 +24,7 @@ glslang::TShader::Includer::IncludeResult* read_include(std::filesystem::path co
 }
 
 
-glslang::TShader::Includer::IncludeResult* megamol::shaderfactory::includer::includeSystem(
+glslang::TShader::Includer::IncludeResult* msf::Includer::includeSystem(
     const char* header_name, const char* includer_name, size_t inclusion_depth) {
     for (auto const& el : shader_include_paths_) {
         auto search_path = el / header_name;
@@ -43,7 +43,7 @@ glslang::TShader::Includer::IncludeResult* megamol::shaderfactory::includer::inc
 }
 
 
-void megamol::shaderfactory::includer::releaseInclude(glslang::TShader::Includer::IncludeResult* data) {
+void msf::Includer::releaseInclude(glslang::TShader::Includer::IncludeResult* data) {
     if (data != nullptr) {
         safe_delete_array(data->headerData);
         safe_delete(data->userData);

@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2020-2021 by Universitaet Stuttgart (VISUS). Alle Rechte vorbehalten.
  */
-#include "msf/compiler.h"
+#include "msf/ShaderFactory.h"
 
 #include <algorithm>
 #include <sstream>
@@ -13,7 +13,7 @@
 #include <ResourceLimits.h>
 #include <glslang/Public/ShaderLang.h>
 
-#include "includer.h"
+#include "Includer.h"
 
 /*
  * Adapted from : https://github.com/google/shaderc/blob/main/libshaderc_util/src/compiler.cc
@@ -43,16 +43,16 @@ std::tuple<bool, int, EProfile> find_and_parse_version_string(std::string const&
     return std::make_tuple(true, version, profile);
 }
 
-megamol::shaderfactory::compiler::compiler() {
+msf::ShaderFactory::ShaderFactory() {
     glslang::InitializeProcess();
 }
 
-megamol::shaderfactory::compiler::~compiler() {
+msf::ShaderFactory::~ShaderFactory() {
     glslang::FinalizeProcess();
 }
 
-std::string megamol::shaderfactory::compiler::preprocess(
-    std::filesystem::path const& shader_source_path, compiler_options const& options) const {
+std::string msf::ShaderFactory::preprocess(
+    std::filesystem::path const& shader_source_path, ShaderFactoryOptions const& options) const {
     std::filesystem::path final_shader_source_path;
     if (std::filesystem::exists(shader_source_path)) {
         final_shader_source_path = shader_source_path;
@@ -77,7 +77,7 @@ std::string megamol::shaderfactory::compiler::preprocess(
 
     // auto const shader_type = get_shader_type_sc(final_shader_source_path);
 
-    auto const shader_source = read_shader_source(final_shader_source_path);
+    auto const shader_source = readShaderSource(final_shader_source_path);
 
     auto const shader_source_ptr = shader_source.data();
     auto const shader_source_length = static_cast<int>(shader_source.size());
@@ -100,7 +100,7 @@ std::string megamol::shaderfactory::compiler::preprocess(
         return std::string();
     }
 
-    includer inc(options.get_include_paths());
+    Includer inc(options.get_include_paths());
     std::string output;
     auto const success = shader.preprocess(
         &glslang::DefaultTBuiltInResource, version, profile, true, false, EShMsgDefault, &output, inc);

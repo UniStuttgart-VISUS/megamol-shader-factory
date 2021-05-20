@@ -3,13 +3,13 @@
  *
  * Copyright (C) 2020-2021 by Universitaet Stuttgart (VISUS). Alle Rechte vorbehalten.
  */
-#include "msf/compiler_options.h"
+#include "msf/ShaderFactoryOptions.h"
 
 #include <algorithm>
 
 #include "glad/glad.h"
 
-void megamol::shaderfactory::compiler_options::add_vendor_definition() {
+void msf::ShaderFactoryOptions::addVendorDefinition() {
     std::basic_string<GLubyte> const tmp(glGetString(GL_VENDOR));
     std::string vendor_str;
     vendor_str.resize(tmp.size());

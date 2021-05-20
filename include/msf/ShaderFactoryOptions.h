@@ -9,7 +9,7 @@
 #include <utility>
 #include <vector>
 
-namespace megamol::shaderfactory {
+namespace msf {
 
 struct macro {
     explicit macro(std::string name) : name_(std::move(name)) {}
@@ -20,18 +20,18 @@ struct macro {
     std::string val_;
 };
 
-
 /**
  * Utility for defining shaderc compiler options.
  */
-class compiler_options {
+class ShaderFactoryOptions {
 public:
-    explicit compiler_options(std::vector<std::filesystem::path> const& paths) : include_paths_(paths) {
-        add_vendor_definition();
+    explicit ShaderFactoryOptions(std::vector<std::filesystem::path> include_paths)
+            : include_paths_(std::move(include_paths)) {
+        addVendorDefinition();
     }
 
-    compiler_options(std::vector<std::filesystem::path> const& paths, std::string const& vendor)
-            : include_paths_(paths) {
+    ShaderFactoryOptions(std::vector<std::filesystem::path> include_paths, std::string const& vendor)
+            : include_paths_(std::move(include_paths)) {
         add_definition(vendor);
     }
 
@@ -50,7 +50,7 @@ public:
         include_paths_ = paths;
     }
 
-    std::vector<std::filesystem::path> const& get_include_paths() const {
+    [[nodiscard]] std::vector<std::filesystem::path> const& get_include_paths() const {
         return include_paths_;
     }
 
@@ -70,12 +70,11 @@ public:
     }
 
 private:
-    void add_vendor_definition();
+    void addVendorDefinition();
 
     std::vector<macro> macros_;
 
     std::vector<std::filesystem::path> include_paths_;
 }; // end class compiler_options
 
-
-} // end namespace megamol::shaderfactory
+} // namespace msf

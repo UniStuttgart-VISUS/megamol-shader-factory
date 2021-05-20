@@ -5,7 +5,7 @@
  */
 #pragma once
 
-namespace megamol::shaderfactory {
+namespace msf {
 
 template<typename T>
 void safe_delete_array(T* ptr) {
@@ -23,4 +23,4 @@ void safe_delete(T* ptr) {
     }
 }
 
-} // end namespace megamol::shaderfactory
+} // namespace msf

@@ -21,7 +21,7 @@ std::string str_tolower(std::string s) {
 }
 } // namespace
 
-namespace megamol::shaderfactory {
+namespace msf {
 
 inline std::string get_shader_type_string(std::filesystem::path const& shader_source_path) {
     std::string ext_type = str_tolower(shader_source_path.extension().string());
@@ -101,4 +101,4 @@ inline GLenum get_shader_type_ogl(std::filesystem::path const& shader_source_pat
     return parse_type_string_ogl(shader_type_string);
 }
 
-} // namespace megamol::shaderfactory
+} // namespace msf

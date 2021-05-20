@@ -8,26 +8,25 @@
 #include <filesystem>
 #include <fstream>
 
-#include "msf/compiler_options.h"
+#include "ShaderFactoryOptions.h"
 
-namespace megamol::shaderfactory {
+namespace msf {
 
-class compiler {
+class ShaderFactory {
 public:
-    compiler();
-    ~compiler();
+    ShaderFactory();
+    ~ShaderFactory();
 
-    compiler(compiler const&) = delete;
-    compiler& operator=(compiler const&) = delete;
-
-    compiler(compiler&&) = delete;
-    compiler& operator=(compiler&&) = delete;
+    ShaderFactory(ShaderFactory const&) = delete;
+    ShaderFactory(ShaderFactory&&) = delete;
+    ShaderFactory& operator=(ShaderFactory const&) = delete;
+    ShaderFactory& operator=(ShaderFactory&&) = delete;
 
     [[nodiscard]] std::string preprocess(
-        std::filesystem::path const& shader_source_path, compiler_options const& options) const;
+        std::filesystem::path const& shader_source_path, ShaderFactoryOptions const& options) const;
 
 private:
-    static std::string read_shader_source(std::filesystem::path const& shader_source_path) {
+    static std::string readShaderSource(std::filesystem::path const& shader_source_path) {
         auto const size = std::filesystem::file_size(shader_source_path);
         std::ifstream file(shader_source_path);
 
@@ -41,4 +40,4 @@ private:
     }
 };
 
-} // end namespace megamol::shaderfactory
+} // namespace msf
