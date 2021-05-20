@@ -12,8 +12,6 @@
 
 #include <glslang/Public/ShaderLang.h>
 
-#include "msf/utils.h"
-
 namespace msf {
 
 class Includer final : public glslang::TShader::Includer {
@@ -24,7 +22,7 @@ public:
 
     IncludeResult* includeSystem(const char* header_name, const char* includer_name, size_t inclusion_depth) override;
 
-    void releaseInclude(IncludeResult* inc_res) override;
+    void releaseInclude(IncludeResult* result) override;
 
 private:
     std::vector<std::filesystem::path> shader_include_paths_;

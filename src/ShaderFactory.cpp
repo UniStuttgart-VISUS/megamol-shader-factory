@@ -14,6 +14,7 @@
 #include <glslang/Public/ShaderLang.h>
 
 #include "Includer.h"
+#include "Utils.h"
 
 /*
  * Adapted from : https://github.com/google/shaderc/blob/main/libshaderc_util/src/compiler.cc
@@ -77,7 +78,7 @@ std::string msf::ShaderFactory::preprocess(
 
     // auto const shader_type = get_shader_type_sc(final_shader_source_path);
 
-    auto const shader_source = readShaderSource(final_shader_source_path);
+    auto const shader_source = readFileToString(final_shader_source_path);
 
     auto const shader_source_ptr = shader_source.data();
     auto const shader_source_length = static_cast<int>(shader_source.size());
