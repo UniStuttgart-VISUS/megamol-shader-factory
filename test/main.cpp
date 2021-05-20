@@ -1,10 +1,11 @@
 #include <iostream>
 
+#define MSF_OPENGL_INCLUDE_GLAD
 #include "msf/ShaderFactory.h"
-#include "msf/ShaderFactoryOptions.h"
+#include "msf/ShaderFactoryOptionsOpenGL.h"
 
 int main() {
-    msf::ShaderFactoryOptions options({"../test"}, "__AMD__");
+    msf::ShaderFactoryOptionsOpenGL options({"../test"}, "__AMD__");
     // options.add_definition("__AMD__");
 
     msf::ShaderFactory factory;

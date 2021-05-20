@@ -59,7 +59,7 @@ std::string msf::ShaderFactory::preprocess(
         final_shader_source_path = shader_source_path;
     } else if (shader_source_path.is_relative()) {
         bool found_path = false;
-        for (auto const& el : options.get_include_paths()) {
+        for (auto const& el : options.getIncludePaths()) {
             auto search_path = el / shader_source_path;
             if (std::filesystem::exists(search_path)) {
                 if (found_path) {
@@ -87,7 +87,7 @@ std::string msf::ShaderFactory::preprocess(
 
     shader.setStringsWithLengthsAndNames(&shader_source_ptr, &shader_source_length, &shader_source_name_ptr, 1);
 
-    auto preamble = options.get_preamble();
+    auto preamble = options.getPreamble();
 
     shader.setPreamble(preamble.c_str());
 
@@ -101,7 +101,7 @@ std::string msf::ShaderFactory::preprocess(
         return std::string();
     }
 
-    Includer inc(options.get_include_paths());
+    Includer inc(options.getIncludePaths());
     std::string output;
     auto const success = shader.preprocess(
         &glslang::DefaultTBuiltInResource, version, profile, true, false, EShMsgDefault, &output, inc);

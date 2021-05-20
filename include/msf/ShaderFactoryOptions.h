@@ -6,6 +6,7 @@
 #pragma once
 
 #include <filesystem>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -21,40 +22,33 @@ struct macro {
 };
 
 /**
- * Utility for defining shaderc compiler options.
+ * Utility for defining shader factory options.
  */
 class ShaderFactoryOptions {
 public:
     explicit ShaderFactoryOptions(std::vector<std::filesystem::path> include_paths)
-            : include_paths_(std::move(include_paths)) {
-        addVendorDefinition();
-    }
+            : include_paths_(std::move(include_paths)) {}
 
-    ShaderFactoryOptions(std::vector<std::filesystem::path> include_paths, std::string const& vendor)
-            : include_paths_(std::move(include_paths)) {
-        add_definition(vendor);
-    }
-
-    void add_definition(std::string const& name) {
+    void addDefinition(std::string const& name) {
         macros_.emplace_back(name);
     }
 
-    void add_definition(std::string const& name, std::string const& value) {
+    void addDefinition(std::string const& name, std::string const& value) {
         macros_.emplace_back(name, value);
     }
 
     /**
      * Set include paths. Overrides previously set paths.
      */
-    void set_include_paths(std::vector<std::filesystem::path> const& paths) {
+    void setIncludePaths(std::vector<std::filesystem::path> const& paths) {
         include_paths_ = paths;
     }
 
-    [[nodiscard]] std::vector<std::filesystem::path> const& get_include_paths() const {
+    [[nodiscard]] std::vector<std::filesystem::path> const& getIncludePaths() const {
         return include_paths_;
     }
 
-    std::string get_preamble() const {
+    [[nodiscard]] std::string getPreamble() const {
         std::string preamble;
         preamble += "#extension GL_GOOGLE_include_directive : enable\n";
         for (auto const& macro : macros_) {
@@ -70,8 +64,6 @@ public:
     }
 
 private:
-    void addVendorDefinition();
-
     std::vector<macro> macros_;
 
     std::vector<std::filesystem::path> include_paths_;

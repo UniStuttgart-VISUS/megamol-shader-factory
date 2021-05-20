@@ -6,7 +6,6 @@
 #pragma once
 
 #include <filesystem>
-#include <fstream>
 
 #include "ShaderFactoryOptions.h"
 
