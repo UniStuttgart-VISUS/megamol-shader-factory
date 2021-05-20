@@ -1,7 +1,6 @@
 /*
- * compiler_utils.h
- *
- * Copyright (C) 2020-2021 by Universitaet Stuttgart (VISUS). Alle Rechte vorbehalten.
+ * Copyright (C) 2020-2021 University of Stuttgart (VISUS).
+ * All rights reserved.
  */
 #pragma once
 
