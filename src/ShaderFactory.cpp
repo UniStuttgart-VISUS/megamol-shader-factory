@@ -15,6 +15,7 @@
 #include "Includer.h"
 #include "Utils.h"
 
+namespace {
 /*
  * Adapted from : https://github.com/google/shaderc/blob/main/libshaderc_util/src/compiler.cc
  * License : Apache 2.0
@@ -42,6 +43,7 @@ std::tuple<bool, int, EProfile> find_and_parse_version_string(std::string const&
 
     return std::make_tuple(true, version, profile);
 }
+} // namespace
 
 msf::ShaderFactory::ShaderFactory() {
     if (glslangInitReferenceCounter_ <= 0) {
@@ -107,15 +109,16 @@ std::string msf::ShaderFactory::preprocess(
         return std::string();
     }
 
-    Includer inc(options.getIncludePaths());
+    Includer includer(options.getIncludePaths());
     std::string output;
     auto const success = shader.preprocess(
-        &glslang::DefaultTBuiltInResource, version, profile, true, false, EShMsgDefault, &output, inc);
+        &glslang::DefaultTBuiltInResource, version, profile, true, false, EShMsgDefault, &output, includer);
 
     if (!success) {
         throw std::runtime_error(std::string("Error preprocessing shader:\n") + shader.getInfoLog());
     }
 
+    // make sure version is first line
     auto version_pos = output.find("#version");
     auto version_end = output.find_first_of('\n', version_pos) + 1;
     auto version_string = output.substr(version_pos, version_end - version_pos);

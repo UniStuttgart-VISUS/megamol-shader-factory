@@ -8,10 +8,6 @@
 #include <filesystem>
 #include <string>
 
-#include "glslang/Public/ShaderLang.h"
-
-#include "glad/glad.h"
-
 namespace {
 // from: https://en.cppreference.com/w/cpp/string/byte/tolower
 std::string str_tolower(std::string s) {
@@ -22,82 +18,51 @@ std::string str_tolower(std::string s) {
 
 namespace msf {
 
-inline std::string get_shader_type_string(std::filesystem::path const& shader_source_path) {
-    std::string ext_type = str_tolower(shader_source_path.extension().string());
+// Stay compatible with OpenGL, hardcode values to not depend on any OpenGL include
+enum class ShaderType : unsigned int {
+    Vertex = 0x8B31,         // GL_VERTEX_SHADER
+    TessControl = 0x8E88,    // GL_TESS_CONTROL_SHADER
+    TessEvaluation = 0x8E87, // GL_TESS_EVALUATION_SHADER
+    Geometry = 0x8DD9,       // GL_GEOMETRY_SHADER
+    Fragment = 0x8B30,       // GL_FRAGMENT_SHADER
+    Compute = 0x91B9,        // GL_COMPUTE_SHADER
+    None = 0x0
+};
+
+static inline std::string getShaderExtensionString(std::filesystem::path const& file_path) {
+    std::string ext_type = str_tolower(file_path.extension().string());
     if (ext_type == ".glsl") {
-        return str_tolower(shader_source_path.stem().extension().string());
+        return str_tolower(file_path.stem().extension().string());
     }
     return ext_type;
 }
 
-
-inline EShLanguage parse_type_string_glslang(std::string const& shader_type) {
-    if (shader_type == ".vert") {
-        return EShLangVertex;
+static inline ShaderType getShaderType(std::filesystem::path const& file_path) {
+    auto shader_ext = getShaderExtensionString(file_path);
+    if (shader_ext == ".vert") {
+        return ShaderType::Vertex;
     }
-
-    if (shader_type == ".tesc") {
-        return EShLangTessControl;
+    if (shader_ext == ".tesc") {
+        return ShaderType::TessControl;
     }
-
-    if (shader_type == ".tese") {
-        return EShLangTessEvaluation;
+    if (shader_ext == ".tese") {
+        return ShaderType::TessEvaluation;
     }
-
-    if (shader_type == ".geom") {
-        return EShLangGeometry;
+    if (shader_ext == ".geom") {
+        return ShaderType::Geometry;
     }
-
-    if (shader_type == ".frag") {
-        return EShLangFragment;
+    if (shader_ext == ".frag") {
+        return ShaderType::Fragment;
     }
-
-    if (shader_type == ".comp") {
-        return EShLangCompute;
+    if (shader_ext == ".comp") {
+        return ShaderType::Compute;
     }
-
-    return EShLangCount;
+    return ShaderType::None;
 }
 
-
-inline EShLanguage get_shader_type_glslang(std::filesystem::path const& shader_source_path) {
-    auto const shader_type_string = get_shader_type_string(shader_source_path);
-    return parse_type_string_glslang(shader_type_string);
-}
-
-
-inline GLenum parse_type_string_ogl(std::string const& shader_type) {
-    if (shader_type == ".vert") {
-        return GL_VERTEX_SHADER;
-    }
-
-    if (shader_type == ".tesc") {
-        return GL_TESS_CONTROL_SHADER;
-    }
-
-    if (shader_type == ".tese") {
-        return GL_TESS_EVALUATION_SHADER;
-    }
-
-    if (shader_type == ".geom") {
-        return GL_GEOMETRY_SHADER;
-    }
-
-    if (shader_type == ".frag") {
-        return GL_FRAGMENT_SHADER;
-    }
-
-    if (shader_type == ".comp") {
-        return GL_COMPUTE_SHADER;
-    }
-
-    return 0;
-}
-
-
-inline GLenum get_shader_type_ogl(std::filesystem::path const& shader_source_path) {
-    auto const shader_type_string = get_shader_type_string(shader_source_path);
-    return parse_type_string_ogl(shader_type_string);
+// compatible to GLenum
+static inline unsigned int getShaderTypeInt(std::filesystem::path const& file_path) {
+    return static_cast<std::underlying_type_t<ShaderType>>(getShaderType(file_path));
 }
 
 } // namespace msf
