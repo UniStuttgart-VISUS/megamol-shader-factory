@@ -23,6 +23,9 @@ public:
 
     [[nodiscard]] std::string preprocess(
         std::filesystem::path const& shader_source_path, ShaderFactoryOptions const& options) const;
+
+private:
+    static inline int glslangInitReferenceCounter_ = 0;
 };
 
 } // namespace msf

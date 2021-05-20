@@ -45,11 +45,18 @@ std::tuple<bool, int, EProfile> find_and_parse_version_string(std::string const&
 }
 
 msf::ShaderFactory::ShaderFactory() {
-    glslang::InitializeProcess();
+    if (glslangInitReferenceCounter_ <= 0) {
+        glslang::InitializeProcess();
+    }
+    glslangInitReferenceCounter_++;
 }
 
 msf::ShaderFactory::~ShaderFactory() {
-    glslang::FinalizeProcess();
+    glslangInitReferenceCounter_--;
+    if (glslangInitReferenceCounter_ <= 0) {
+        glslang::FinalizeProcess();
+        glslangInitReferenceCounter_ = 0;
+    }
 }
 
 std::string msf::ShaderFactory::preprocess(
