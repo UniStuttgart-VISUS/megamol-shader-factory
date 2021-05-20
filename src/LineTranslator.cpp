@@ -49,7 +49,15 @@ msf::LineTranslator::LineTranslator(std::string const& shader_source) {
         std::regex_replace(clean_source_, std::regex("(^|\n)#extension[ ]*GL_GOOGLE_include_directive(.*)\n"), "\n");
 }
 
-std::string msf::LineTranslator::translateErrorLog(std::string const& message) {
-    // TODO
-    return message;
+std::string msf::LineTranslator::translateErrorLog(std::string const& message) const {
+    // NVIDIA:  10000(123) : error[...]
+    // AMD:     ERROR: 10000:123: [...]
+    // Intel:   ERROR: 10000:123: [...]
+
+    std::string result = message;
+    for (auto const& file_id : file_ids_) {
+        result = std::regex_replace(
+            result, std::regex(std::to_string(file_id.first) + "(:|\\()([0-9]+)(:|\\))"), file_id.second + "$1$2$3");
+    }
+    return result;
 }

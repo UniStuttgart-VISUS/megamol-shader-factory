@@ -19,7 +19,7 @@ public:
         return clean_source_;
     }
 
-    std::string translateErrorLog(std::string const& message);
+    std::string translateErrorLog(std::string const& message) const;
 
 private:
     std::string clean_source_;
