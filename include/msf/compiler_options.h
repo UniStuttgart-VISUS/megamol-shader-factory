@@ -9,10 +9,6 @@
 #include <utility>
 #include <vector>
 
-#include "glslang/Public/ShaderLang.h"
-
-#include "msf/includer.h"
-
 namespace megamol::shaderfactory {
 
 struct macro {
@@ -30,13 +26,12 @@ struct macro {
  */
 class compiler_options {
 public:
-    explicit compiler_options(std::vector<std::filesystem::path> const& paths)
-            : includer_(includer(paths)), paths_(paths) {
+    explicit compiler_options(std::vector<std::filesystem::path> const& paths) : include_paths_(paths) {
         add_vendor_definition();
     }
 
     compiler_options(std::vector<std::filesystem::path> const& paths, std::string const& vendor)
-            : includer_(includer(paths)), paths_(paths) {
+            : include_paths_(paths) {
         add_definition(vendor);
     }
 
@@ -52,12 +47,11 @@ public:
      * Set include paths. Overrides previously set paths.
      */
     void set_include_paths(std::vector<std::filesystem::path> const& paths) {
-        includer_ = includer(paths);
-        paths_ = paths;
+        include_paths_ = paths;
     }
 
-    std::vector<std::filesystem::path> const& get_shader_paths() const {
-        return paths_;
+    std::vector<std::filesystem::path> const& get_include_paths() const {
+        return include_paths_;
     }
 
     std::string get_preamble() const {
@@ -75,18 +69,12 @@ public:
         return preamble;
     }
 
-    includer get_includer() const {
-        return includer_;
-    }
-
 private:
     void add_vendor_definition();
 
-    includer includer_;
-
     std::vector<macro> macros_;
 
-    std::vector<std::filesystem::path> paths_;
+    std::vector<std::filesystem::path> include_paths_;
 }; // end class compiler_options
 
 

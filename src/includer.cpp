@@ -3,12 +3,12 @@
  *
  * Copyright (C) 2020-2021 by Universitaet Stuttgart (VISUS). Alle Rechte vorbehalten.
  */
-#include "msf/includer.h"
-#include "msf/utils.h"
+#include "includer.h"
 
 #include <fstream>
 #include <utility>
 
+#include "msf/utils.h"
 
 megamol::shaderfactory::includer::includer(std::vector<std::filesystem::path> shader_include_paths)
         : shader_include_paths_(std::move(shader_include_paths)) {}

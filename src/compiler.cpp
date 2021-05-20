@@ -5,12 +5,14 @@
  */
 #include "msf/compiler.h"
 
-#include "msf/includer.h"
-
 #include <algorithm>
 #include <sstream>
 #include <string>
 #include <tuple>
+
+#include <glslang/Public/ShaderLang.h>
+
+#include "includer.h"
 
 /*
  * default resource limits for glslang compiler
@@ -159,6 +161,13 @@ std::tuple<bool, int, EProfile> find_and_parse_version_string(std::string const&
     return std::make_tuple(true, version, profile);
 }
 
+megamol::shaderfactory::compiler::compiler() {
+    glslang::InitializeProcess();
+}
+
+megamol::shaderfactory::compiler::~compiler() {
+    glslang::FinalizeProcess();
+}
 
 std::string megamol::shaderfactory::compiler::preprocess(
     std::filesystem::path const& shader_source_path, compiler_options const& options) const {
@@ -167,7 +176,7 @@ std::string megamol::shaderfactory::compiler::preprocess(
         final_shader_source_path = shader_source_path;
     } else if (shader_source_path.is_relative()) {
         bool found_path = false;
-        for (auto const& el : options.get_shader_paths()) {
+        for (auto const& el : options.get_include_paths()) {
             auto search_path = el / shader_source_path;
             if (std::filesystem::exists(search_path)) {
                 if (found_path) {
@@ -209,7 +218,7 @@ std::string megamol::shaderfactory::compiler::preprocess(
         return std::string();
     }
 
-    auto inc = options.get_includer();
+    includer inc(options.get_include_paths());
     std::string output;
     auto const success =
         shader.preprocess(&default_resource_limits, version, profile, true, false, EShMsgDefault, &output, inc);

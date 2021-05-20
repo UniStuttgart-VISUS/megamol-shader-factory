@@ -8,27 +8,20 @@
 #include <filesystem>
 #include <fstream>
 
-#include "glslang/Public/ShaderLang.h"
-
 #include "msf/compiler_options.h"
 
 namespace megamol::shaderfactory {
 
 class compiler {
 public:
-    compiler() {
-        glslang::InitializeProcess();
-    }
+    compiler();
+    ~compiler();
 
     compiler(compiler const&) = delete;
     compiler& operator=(compiler const&) = delete;
 
     compiler(compiler&&) = delete;
     compiler& operator=(compiler&&) = delete;
-
-    ~compiler() {
-        glslang::FinalizeProcess();
-    }
 
     [[nodiscard]] std::string preprocess(
         std::filesystem::path const& shader_source_path, compiler_options const& options) const;
