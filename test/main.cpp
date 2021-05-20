@@ -6,10 +6,11 @@
 
 int main() {
     msf::ShaderFactoryOptionsOpenGL options({"../test"}, "__AMD__");
-    // options.add_definition("__AMD__");
+    // options.addDefinition("__AMD__");
 
     msf::ShaderFactory factory;
     auto content = factory.preprocess("../test/test.vert.glsl", options);
-    std::cout << content;
+    std::cout << content << std::endl;
+
     return 0;
 }
