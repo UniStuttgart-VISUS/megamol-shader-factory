@@ -4,51 +4,48 @@
  */
 #include "msf/LineTranslator.h"
 
-#include <algorithm>
 #include <regex>
+#include <sstream>
 
 msf::LineTranslator::LineTranslator() : next_id_(10000) {}
 
 std::string msf::LineTranslator::cleanupShader(const std::string& shader_source) {
-    std::vector<std::string> file_list;
-
-    const std::regex find_lines("(?:^|\n)#line [0-9]+ \"(.*)\"");
-    std::sregex_iterator it(shader_source.begin(), shader_source.end(), find_lines);
-    auto it_end = std::sregex_iterator();
-
-    while (it != it_end) {
-        file_list.emplace_back((*it)[1]);
-        it++;
-    }
-
-    std::sort(file_list.begin(), file_list.end());
-    file_list.erase(std::unique(file_list.begin(), file_list.end()), file_list.end());
-
-    // Replace source strings by numbers.
-    // Max number should be 32767 (max of short).
-    // Size of source file id depends on driver:
+    // The shader factory outputs #line annotations in the following form:
+    //   #line 123 "source.glsl"
+    // GLSL standard only allows allows two ints as params for #line. Therefore,
+    // we replace the string with an int and store the int to filename mapping.
+    //
+    // The allowed range of the second in param depends on the driver:
     // NVIDIA: int32_t
     // AMD: int16_t
     // Intel: uint16_t
+    // Therefore, the max int id we should use is 32767 (max of short).
     // Just start by 10000 to constantly use 5 char numbers for stable regex replacement later.
 
-    for (auto const& file : file_list) {
-        file_ids_.emplace_back(std::make_pair(next_id_, file));
-        next_id_++;
+    const std::regex line_pattern("^#line ([0-9]+) \"(.*)\".*");
+    const std::regex google_include_pattern("^#extension[ ]*GL_GOOGLE_include_directive.*");
+    std::smatch match;
+
+    std::istringstream stream(shader_source);
+    std::stringstream clean_source;
+    std::string line;
+    while (std::getline(stream, line)) {
+        // Remove windows line ending
+        if (line.back() == '\r') {
+            line.pop_back();
+        }
+
+        if (std::regex_match(line, match, line_pattern)) {
+            clean_source << "#line " << match[1] << " " << filenameToId(match[2]) << '\n';
+        } else if (std::regex_match(line, google_include_pattern)) {
+            // remove this line
+            continue;
+        } else {
+            clean_source << line << '\n';
+        }
     }
 
-    // Replace file string by id
-    std::string clean_source = shader_source;
-    for (auto const& file_id : file_ids_) {
-        const std::regex replace_lines("(^|\n)#line ([0-9]+) \"" + file_id.second + "\"");
-        clean_source = std::regex_replace(clean_source, replace_lines, "$1#line $2 " + std::to_string(file_id.first));
-    }
-
-    // remove GL_GOOGLE_include_directive extension
-    clean_source =
-        std::regex_replace(clean_source, std::regex("(^|\n)#extension[ ]*GL_GOOGLE_include_directive(.*)\n"), "\n");
-
-    return clean_source;
+    return clean_source.str();
 }
 
 std::string msf::LineTranslator::translateErrorLog(std::string const& message) const {
@@ -57,9 +54,20 @@ std::string msf::LineTranslator::translateErrorLog(std::string const& message) c
     // Intel:   ERROR: 10000:123: [...]
 
     std::string result = message;
-    for (auto const& file_id : file_ids_) {
+    for (auto const& file_id : file_id_map_) {
         result = std::regex_replace(
-            result, std::regex(std::to_string(file_id.first) + "(:|\\()([0-9]+)(:|\\))"), file_id.second + "$1$2$3");
+            result, std::regex(std::to_string(file_id.second) + "(:|\\()([0-9]+)(:|\\))"), file_id.first + "$1$2$3");
     }
     return result;
+}
+
+int msf::LineTranslator::filenameToId(const std::string& filename) {
+    auto it = file_id_map_.find(filename);
+    if (it != file_id_map_.end()) {
+        return it->second;
+    }
+    int new_id = next_id_;
+    next_id_++;
+    file_id_map_[filename] = new_id;
+    return new_id;
 }

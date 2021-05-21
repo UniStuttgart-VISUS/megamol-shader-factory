@@ -5,8 +5,7 @@
 #pragma once
 
 #include <string>
-#include <utility>
-#include <vector>
+#include <unordered_map>
 
 namespace msf {
 
@@ -20,8 +19,10 @@ public:
     [[nodiscard]] std::string translateErrorLog(std::string const& message) const;
 
 private:
+    int filenameToId(std::string const& filename);
+
     int next_id_;
-    std::vector<std::pair<int, std::string>> file_ids_;
+    std::unordered_map<std::string, int> file_id_map_;
 };
 
 } // namespace msf
