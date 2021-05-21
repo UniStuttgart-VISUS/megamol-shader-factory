@@ -41,14 +41,14 @@ target_include_directories(msf_static
     ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 # Bundle with all glslang libs into a single static library
-shaderc_combine_static_lib(msf_bundle msf_static)
-target_include_directories(msf_bundle INTERFACE
+shaderc_combine_static_lib(msf_combined msf_static)
+target_include_directories(msf_combined INTERFACE
   $<INSTALL_INTERFACE:include>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 if (NOT WIN32)
   # Required for glslang::osdependent
   find_package(Threads)
-  target_link_libraries(msf_bundle INTERFACE Threads::Threads)
+  target_link_libraries(msf_combined INTERFACE Threads::Threads)
 endif ()
 
 # Install
@@ -58,10 +58,15 @@ install(DIRECTORY
   ${CMAKE_CURRENT_SOURCE_DIR}/include/
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-get_target_property(bundle_lib_file msf_bundle IMPORTED_LOCATION)
-install(FILES
-  ${bundle_lib_file}
-  DESTINATION ${CMAKE_INSTALL_LIBDIR})
+get_target_property(combined_lib_file msf_combined IMPORTED_LOCATION)
+# Fix for Visual Studio, see: https://github.com/google/shaderc/blob/v2021.0/libshaderc/CMakeLists.txt#L101-L112
+string(REGEX MATCH "Visual Studio .*" vs_generator "${CMAKE_GENERATOR}")
+if (NOT "${vs_generator}" STREQUAL "")
+  string(REPLACE "$(Configuration)" "\${CMAKE_INSTALL_CONFIG_NAME}" combined_lib_file_vs "${combined_lib_file}")
+  install(FILES ${combined_lib_file_vs} DESTINATION ${CMAKE_INSTALL_LIBDIR})
+else()
+  install(FILES ${combined_lib_file} DESTINATION ${CMAKE_INSTALL_LIBDIR})
+endif()
 
 # Source groups in Visual Studio
 set_target_properties(msf_static PROPERTIES FOLDER base)
