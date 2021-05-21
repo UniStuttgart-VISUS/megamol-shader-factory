@@ -7,12 +7,13 @@
 #include <algorithm>
 #include <regex>
 
-msf::LineTranslator::LineTranslator(std::string const& shader_source) {
+msf::LineTranslator::LineTranslator() : next_id_(10000) {}
 
+std::string msf::LineTranslator::cleanupShader(const std::string& shader_source) {
     std::vector<std::string> file_list;
 
-    std::regex line_pattern("(?:^|\n)#line [0-9]+ \"(.*)\"");
-    std::sregex_iterator it(shader_source.begin(), shader_source.end(), line_pattern);
+    const std::regex find_lines("(?:^|\n)#line [0-9]+ \"(.*)\"");
+    std::sregex_iterator it(shader_source.begin(), shader_source.end(), find_lines);
     auto it_end = std::sregex_iterator();
 
     while (it != it_end) {
@@ -29,24 +30,25 @@ msf::LineTranslator::LineTranslator(std::string const& shader_source) {
     // NVIDIA: int32_t
     // AMD: int16_t
     // Intel: uint16_t
-
     // Just start by 10000 to constantly use 5 char numbers for stable regex replacement later.
-    int id = 10000;
+
     for (auto const& file : file_list) {
-        file_ids_.emplace_back(std::make_pair(id, file));
-        id++;
+        file_ids_.emplace_back(std::make_pair(next_id_, file));
+        next_id_++;
     }
 
     // Replace file string by id
-    clean_source_ = shader_source;
+    std::string clean_source = shader_source;
     for (auto const& file_id : file_ids_) {
-        std::regex line_pattern("(^|\n)#line ([0-9]+) \"" + file_id.second + "\"");
-        clean_source_ = std::regex_replace(clean_source_, line_pattern, "$1#line $2 " + std::to_string(file_id.first));
+        const std::regex replace_lines("(^|\n)#line ([0-9]+) \"" + file_id.second + "\"");
+        clean_source = std::regex_replace(clean_source, replace_lines, "$1#line $2 " + std::to_string(file_id.first));
     }
 
     // remove GL_GOOGLE_include_directive extension
-    clean_source_ =
-        std::regex_replace(clean_source_, std::regex("(^|\n)#extension[ ]*GL_GOOGLE_include_directive(.*)\n"), "\n");
+    clean_source =
+        std::regex_replace(clean_source, std::regex("(^|\n)#extension[ ]*GL_GOOGLE_include_directive(.*)\n"), "\n");
+
+    return clean_source;
 }
 
 std::string msf::LineTranslator::translateErrorLog(std::string const& message) const {

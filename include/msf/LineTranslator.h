@@ -12,17 +12,15 @@ namespace msf {
 
 class LineTranslator {
 public:
-    explicit LineTranslator(std::string const& shader_source);
+    LineTranslator();
     ~LineTranslator() = default;
 
-    [[nodiscard]] std::string const& getCleanShader() const {
-        return clean_source_;
-    }
+    std::string cleanupShader(const std::string& shader_source);
 
-    std::string translateErrorLog(std::string const& message) const;
+    [[nodiscard]] std::string translateErrorLog(std::string const& message) const;
 
 private:
-    std::string clean_source_;
+    int next_id_;
     std::vector<std::pair<int, std::string>> file_ids_;
 };
 
