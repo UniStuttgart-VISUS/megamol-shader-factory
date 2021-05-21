@@ -31,7 +31,7 @@ std::string msf::LineTranslator::cleanupShader(const std::string& shader_source)
     std::string line;
     while (std::getline(stream, line)) {
         // Remove windows line ending
-        if (line.back() == '\r') {
+        if (!line.empty() && line.back() == '\r') {
             line.pop_back();
         }
 
