@@ -22,7 +22,7 @@ private:
     int filenameToId(std::string const& filename);
 
     int next_id_;
-    std::unordered_map<std::string, int> file_id_map_;
+    std::unordered_map<int, std::string> file_id_map_;
 };
 
 } // namespace msf

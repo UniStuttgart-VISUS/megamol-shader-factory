@@ -56,18 +56,14 @@ std::string msf::LineTranslator::translateErrorLog(std::string const& message) c
     std::string result = message;
     for (auto const& file_id : file_id_map_) {
         result = std::regex_replace(
-            result, std::regex(std::to_string(file_id.second) + "(:|\\()([0-9]+)(:|\\))"), file_id.first + "$1$2$3");
+            result, std::regex(std::to_string(file_id.first) + "(:|\\()([0-9]+)(:|\\))"), file_id.second + "$1$2$3");
     }
     return result;
 }
 
 int msf::LineTranslator::filenameToId(const std::string& filename) {
-    auto it = file_id_map_.find(filename);
-    if (it != file_id_map_.end()) {
-        return it->second;
-    }
     int new_id = next_id_;
     next_id_++;
-    file_id_map_[filename] = new_id;
+    file_id_map_[new_id] = filename;
     return new_id;
 }
