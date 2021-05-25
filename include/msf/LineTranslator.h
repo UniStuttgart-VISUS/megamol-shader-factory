@@ -19,10 +19,8 @@ public:
     [[nodiscard]] std::string translateErrorLog(std::string const& message) const;
 
 private:
-    int filenameToId(std::string const& filename);
-
     int next_id_;
-    std::unordered_map<int, std::string> file_id_map_;
+    std::unordered_map<int, std::string> id_file_map_;
 };
 
 } // namespace msf

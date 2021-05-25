@@ -26,8 +26,8 @@ std::string msf::LineTranslator::cleanupShader(const std::string& shader_source)
     const std::regex google_include_pattern("^#extension[ ]*GL_GOOGLE_include_directive.*");
     std::smatch match;
 
-    std::istringstream stream(shader_source);
     std::stringstream clean_source;
+    std::istringstream stream(shader_source);
     std::string line;
     while (std::getline(stream, line)) {
         // Remove windows line ending
@@ -36,7 +36,9 @@ std::string msf::LineTranslator::cleanupShader(const std::string& shader_source)
         }
 
         if (std::regex_match(line, match, line_pattern)) {
-            clean_source << "#line " << match[1] << " " << filenameToId(match[2]) << '\n';
+            id_file_map_[next_id_] = match[2].str();
+            clean_source << "#line " << match[1].str() << " " << next_id_ << '\n';
+            next_id_++;
         } else if (std::regex_match(line, google_include_pattern)) {
             // remove this line
             continue;
@@ -54,15 +56,16 @@ std::string msf::LineTranslator::translateErrorLog(std::string const& message) c
     // Intel:   ERROR: 10000:123: [...]
 
     std::regex msg_pattern("([0-9]{5})([:|\\(][0-9]+[:|\\)])");
-    std::smatch sm;
+    std::smatch match;
     std::stringstream result;
     std::istringstream stream(message);
-    for (std::string line; std::getline(stream, line);) {
-        if (std::regex_search(line, sm, msg_pattern)) {
-            auto const id = std::stoi(sm[1].str());
-            auto const it = file_id_map_.find(id);
-            if (it != file_id_map_.end()) {
-                result << sm.prefix() << it->second << sm[2].str() << sm.suffix() << '\n';
+    std::string line;
+    while (std::getline(stream, line)) {
+        if (std::regex_search(line, match, msg_pattern)) {
+            auto const id = std::stoi(match[1].str());
+            auto const it = id_file_map_.find(id);
+            if (it != id_file_map_.end()) {
+                result << match.prefix() << it->second << match[2].str() << match.suffix() << '\n';
                 continue;
             }
         }
@@ -70,11 +73,4 @@ std::string msf::LineTranslator::translateErrorLog(std::string const& message) c
     }
 
     return result.str();
-}
-
-int msf::LineTranslator::filenameToId(const std::string& filename) {
-    int new_id = next_id_;
-    next_id_++;
-    file_id_map_[new_id] = filename;
-    return new_id;
 }
