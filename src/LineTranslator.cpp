@@ -55,20 +55,23 @@ std::string msf::LineTranslator::translateErrorLog(std::string const& message) c
 
     std::regex msg_pattern("([0-9]{5})([:|\\(][0-9]+[:|\\)])");
     std::smatch sm;
-    std::string result = message;
-    if (std::regex_search(message, sm, msg_pattern)) {
-        auto const matched_string = sm[1].str();
-        auto const id = std::stoi(matched_string);
-        result = sm.prefix();
-        try {
-            result += file_id_map_.at(id);
+    std::stringstream result;
+    std::istringstream stream(message);
+    for (std::string line; std::getline(stream, line);) {
+        if (std::regex_search(line, sm, msg_pattern)) {
+            auto const matched_string = sm[1].str();
+            auto const id = std::stoi(matched_string);
+            result << sm.prefix();
+            try {
+                result << file_id_map_.at(id);
+            } catch (...) { return message; }
+            result << sm[2].str();
+            result << sm.suffix();
         }
-        catch (...) { return message; }
-        result += sm[2].str();
-        result += sm.suffix();
+        result << '\n';
     }
 
-    return result;
+    return result.str();
 }
 
 int msf::LineTranslator::filenameToId(const std::string& filename) {
