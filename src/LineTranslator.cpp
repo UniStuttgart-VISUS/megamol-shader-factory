@@ -59,16 +59,14 @@ std::string msf::LineTranslator::translateErrorLog(std::string const& message) c
     std::istringstream stream(message);
     for (std::string line; std::getline(stream, line);) {
         if (std::regex_search(line, sm, msg_pattern)) {
-            auto const matched_string = sm[1].str();
-            auto const id = std::stoi(matched_string);
-            result << sm.prefix();
-            try {
-                result << file_id_map_.at(id);
-            } catch (...) { return message; }
-            result << sm[2].str();
-            result << sm.suffix();
+            auto const id = std::stoi(sm[1].str());
+            auto const it = file_id_map_.find(id);
+            if (it != file_id_map_.end()) {
+                result << sm.prefix() << it->second << sm[2].str() << sm.suffix() << '\n';
+                continue;
+            }
         }
-        result << '\n';
+        result << line << '\n';
     }
 
     return result.str();
