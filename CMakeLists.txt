@@ -1,58 +1,75 @@
-cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
 
 # Project
-project(megamol-shader-factory CXX)
+project(msf
+  VERSION 0.1.0
+  LANGUAGES CXX)
 
 # Set a default build type if none was specified
 if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   message(STATUS "Setting build type to 'Release' as none was specified.")
   set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
-  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "RelWithDebInfo" "MinSizeRel")
 endif ()
 
-# Modules
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
-
 # Dependencies
-include("CMakeExternals.cmake")
-require_external(glslang)
+include(cmake/libs.cmake)
+
+# Utils
+include(cmake/shaderc_utils.cmake)
 
 # Options
 option(BUILD_MSF_TEST "BUILD_MSF_TEST" OFF)
 
-option(GLAD_IS_SHARED "GLAD_IS_SHARED" OFF)
-set(GLAD_PATH "." CACHE PATH "Path to glad install dir")
-set(GLAD_INCLUDE "${GLAD_PATH}/include")
-set(GLAD_LIB_PATH "${GLAD_PATH}/lib")
-
 # Collect source files
-file(GLOB_RECURSE public_header_files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "include/*.h" "include/*.inl")
+file(GLOB_RECURSE public_header_files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "include/*.h")
 file(GLOB_RECURSE source_files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "src/*.cpp")
 file(GLOB_RECURSE header_files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "src/*.h")
 
 # Library
-add_library(${PROJECT_NAME} STATIC ${public_header_files} ${header_files} ${source_files})
-if (MSVC)
-  target_compile_options(${PROJECT_NAME} PRIVATE "/MP" "/arch:SSE2" "/permissive-" "/Zc:rvalueCast" "/Wall" "/MD$<$<CONFIG:Debug>:d>")
-  if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    target_compile_options(${PROJECT_NAME} PRIVATE "-Wno-c++98-compat" "-Wno-c++98-c++11-compat" "-Wno-c++98-compat-pedantic" "-Xclang" "-pedantic")
-  endif ()
-else ()
-  target_compile_options(${PROJECT_NAME} PRIVATE "-fPIC")
-endif ()
-set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
-set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_EXTENSIONS OFF)
-target_link_directories(${PROJECT_NAME} PUBLIC ${GLAD_LIB_PATH})
-target_link_libraries(${PROJECT_NAME} PUBLIC glslang::glslang glslang::machineindependent glslang::oglcompiler glslang::osdependent glslang::genericcodegen)
-external_get_property(glslang INSTALL_DIR)
-target_include_directories(${PROJECT_NAME}
-  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> "src" "include" ${INSTALL_DIR}/include ${GLAD_INCLUDE})
-if (GLAD_IS_SHARED)
-  target_compile_definitions(${PROJECT_NAME} PUBLIC GLAD_GLAPI_EXPORT)
+add_library(msf_static STATIC ${public_header_files} ${header_files} ${source_files})
+target_compile_features(msf_static PUBLIC cxx_std_17)
+set_target_properties(msf_static PROPERTIES
+  CXX_EXTENSIONS OFF
+  POSITION_INDEPENDENT_CODE ON)
+target_link_libraries(msf_static PRIVATE glslang glslang-default-resource-limits)
+target_include_directories(msf_static
+  PUBLIC
+    $<INSTALL_INTERFACE:include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src)
+
+# Bundle with all glslang libs into a single static library
+shaderc_combine_static_lib(msf_combined msf_static)
+target_include_directories(msf_combined INTERFACE
+  $<INSTALL_INTERFACE:include>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
+if (NOT WIN32)
+  # Required for glslang::osdependent
+  find_package(Threads)
+  target_link_libraries(msf_combined INTERFACE Threads::Threads)
 endif ()
 
+# Install
+include(GNUInstallDirs)
+
+install(DIRECTORY
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+get_target_property(combined_lib_file msf_combined IMPORTED_LOCATION)
+# Fix for Visual Studio, see: https://github.com/google/shaderc/blob/v2021.0/libshaderc/CMakeLists.txt#L101-L112
+string(REGEX MATCH "Visual Studio .*" vs_generator "${CMAKE_GENERATOR}")
+if (NOT "${vs_generator}" STREQUAL "")
+  string(REPLACE "$(Configuration)" "\${CMAKE_INSTALL_CONFIG_NAME}" combined_lib_file_vs "${combined_lib_file}")
+  install(FILES ${combined_lib_file_vs} DESTINATION ${CMAKE_INSTALL_LIBDIR})
+else()
+  install(FILES ${combined_lib_file} DESTINATION ${CMAKE_INSTALL_LIBDIR})
+endif()
+
 # Source groups in Visual Studio
-set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER base)
+set_target_properties(msf_static PROPERTIES FOLDER base)
 foreach (FILE_NAME ${source_files})
   get_filename_component(FILE_PATH ${FILE_NAME} PATH)
   string(REPLACE "/" "\\" GROUP_NAME ${FILE_PATH})
@@ -72,26 +89,10 @@ foreach (FILE_NAME ${public_header_files})
   source_group(${GROUP_NAME} FILES ${FILE_NAME})
 endforeach ()
 
-# Installation rules for generated files
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION "include")
-if (WIN32)
-  install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION "bin")
-  install(TARGETS ${PROJECT_NAME} ARCHIVE DESTINATION "lib")
-else ()
-  install(TARGETS ${PROJECT_NAME} DESTINATION "lib" EXPORT ${PROJECT_NAME}-target)
-endif ()
-install(DIRECTORY ${INSTALL_DIR}/include/ DESTINATION "include")
-install(DIRECTORY ${INSTALL_DIR}/lib/ DESTINATION "lib")
-
 # Test
 if (BUILD_MSF_TEST)
   add_executable(mmshader_test test/main.cpp)
-  target_link_libraries(mmshader_test PRIVATE ${PROJECT_NAME})
-  if (NOT WIN32)
-    # Required for glslang::osdependent
-    find_package(Threads)
-    target_link_libraries(mmshader_test PRIVATE Threads::Threads)
-  endif ()
+  target_link_libraries(mmshader_test PRIVATE msf_static)
   set_property(TARGET mmshader_test PROPERTY CXX_STANDARD 17)
   set_property(TARGET mmshader_test PROPERTY CXX_EXTENSIONS OFF)
 endif ()

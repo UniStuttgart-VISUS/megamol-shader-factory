@@ -1,17 +1,21 @@
 /*
- * compiler.cpp
- *
- * Copyright (C) 2020-2021 by Universitaet Stuttgart (VISUS). Alle Rechte vorbehalten.
+ * Copyright (C) 2020-2021 University of Stuttgart (VISUS).
+ * All rights reserved.
  */
-#include "msf/compiler.h"
-
-#include "msf/includer.h"
+#include "msf/ShaderFactory.h"
 
 #include <algorithm>
 #include <sstream>
 #include <string>
 #include <tuple>
 
+#include <ResourceLimits.h>
+#include <glslang/Public/ShaderLang.h>
+
+#include "Includer.h"
+#include "Utils.h"
+
+namespace {
 /*
  * Adapted from : https://github.com/google/shaderc/blob/main/libshaderc_util/src/compiler.cc
  * License : Apache 2.0
@@ -39,16 +43,31 @@ std::tuple<bool, int, EProfile> find_and_parse_version_string(std::string const&
 
     return std::make_tuple(true, version, profile);
 }
+} // namespace
 
+msf::ShaderFactory::ShaderFactory() {
+    if (glslangInitReferenceCounter_ <= 0) {
+        glslang::InitializeProcess();
+    }
+    glslangInitReferenceCounter_++;
+}
 
-std::string megamol::shaderfactory::compiler::preprocess(
-    std::filesystem::path const& shader_source_path, compiler_options const& options) const {
+msf::ShaderFactory::~ShaderFactory() {
+    glslangInitReferenceCounter_--;
+    if (glslangInitReferenceCounter_ <= 0) {
+        glslang::FinalizeProcess();
+        glslangInitReferenceCounter_ = 0;
+    }
+}
+
+std::string msf::ShaderFactory::preprocess(
+    std::filesystem::path const& shader_source_path, ShaderFactoryOptions const& options) const {
     std::filesystem::path final_shader_source_path;
     if (std::filesystem::exists(shader_source_path)) {
         final_shader_source_path = shader_source_path;
     } else if (shader_source_path.is_relative()) {
         bool found_path = false;
-        for (auto const& el : options.get_shader_paths()) {
+        for (auto const& el : options.getIncludePaths()) {
             auto search_path = el / shader_source_path;
             if (std::filesystem::exists(search_path)) {
                 if (found_path) {
@@ -67,7 +86,7 @@ std::string megamol::shaderfactory::compiler::preprocess(
 
     // auto const shader_type = get_shader_type_sc(final_shader_source_path);
 
-    auto const shader_source = read_shader_source(final_shader_source_path);
+    auto const shader_source = readFileToString(final_shader_source_path);
 
     auto const shader_source_ptr = shader_source.data();
     auto const shader_source_length = static_cast<int>(shader_source.size());
@@ -76,7 +95,7 @@ std::string megamol::shaderfactory::compiler::preprocess(
 
     shader.setStringsWithLengthsAndNames(&shader_source_ptr, &shader_source_length, &shader_source_name_ptr, 1);
 
-    auto preamble = options.get_preamble();
+    auto preamble = options.getPreamble();
 
     shader.setPreamble(preamble.c_str());
 
@@ -90,15 +109,16 @@ std::string megamol::shaderfactory::compiler::preprocess(
         return std::string();
     }
 
-    auto inc = options.get_includer();
+    Includer includer(options.getIncludePaths());
     std::string output;
-    auto const success =
-        shader.preprocess(options.get_resource_limits(), version, profile, true, false, EShMsgDefault, &output, inc);
+    auto const success = shader.preprocess(
+        &glslang::DefaultTBuiltInResource, version, profile, true, false, EShMsgDefault, &output, includer);
 
     if (!success) {
         throw std::runtime_error(std::string("Error preprocessing shader:\n") + shader.getInfoLog());
     }
 
+    // make sure version is first line
     auto version_pos = output.find("#version");
     auto version_end = output.find_first_of('\n', version_pos) + 1;
     auto version_string = output.substr(version_pos, version_end - version_pos);
