@@ -53,17 +53,18 @@ std::string msf::LineTranslator::translateErrorLog(std::string const& message) c
     // AMD:     ERROR: 10000:123: [...]
     // Intel:   ERROR: 10000:123: [...]
 
-    std::regex msg_pattern("([0-9]{5})[:|\\(][0-9]+[:|\\)]");
+    std::regex msg_pattern("([0-9]{5})([:|\\(][0-9]+[:|\\)])");
     std::smatch sm;
     std::string result = message;
     if (std::regex_search(message, sm, msg_pattern)) {
-        auto const matched_string = sm[0].str();
+        auto const matched_string = sm[1].str();
         auto const id = std::stoi(matched_string);
         result = sm.prefix();
         try {
             result += file_id_map_.at(id);
         }
         catch (...) { return message; }
+        result += sm[2].str();
         result += sm.suffix();
     }
 
