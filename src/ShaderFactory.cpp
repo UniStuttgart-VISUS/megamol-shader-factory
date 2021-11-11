@@ -95,7 +95,19 @@ std::string msf::ShaderFactory::preprocess(
 
     shader.setStringsWithLengthsAndNames(&shader_source_ptr, &shader_source_length, &shader_source_name_ptr, 1);
 
-    auto preamble = options.getPreamble();
+    std::string preamble;
+    preamble += "#extension GL_GOOGLE_include_directive : enable\n";
+    for (auto const& macro : options.getMacros()) {
+        if (!macro.name_.empty()) {
+            preamble += "#define " + macro.name_;
+            if (!macro.val_.empty()) {
+                preamble += " " + macro.val_;
+            }
+            preamble += "\n";
+        }
+    }
+    // #line must be last in preamble. Don't use a different line number than 1 or glslang will mess up lines!
+    preamble += "#line 1 \"" + shader_source_name + "\"\n";
 
     shader.setPreamble(preamble.c_str());
 
@@ -120,10 +132,10 @@ std::string msf::ShaderFactory::preprocess(
 
     // make sure version is first line
     auto version_pos = output.find("#version");
-    auto version_end = output.find_first_of('\n', version_pos) + 1;
+    auto version_end = output.find_first_of('\n', version_pos);
     auto version_string = output.substr(version_pos, version_end - version_pos);
-    output.erase(version_pos, version_end - version_pos);
-    output.insert(0, version_string);
+    output.erase(version_pos, version_end - version_pos); // keep '\n'
+    output.insert(0, version_string + "\n");
 
     return output;
 }
