@@ -1,3 +1,6 @@
+/*
+ * Test comment
+ */
 #version 430
 
 #include "common.glsl"
