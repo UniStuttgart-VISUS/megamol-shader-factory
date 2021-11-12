@@ -47,19 +47,8 @@ public:
         return include_paths_;
     }
 
-    [[nodiscard]] std::string getPreamble() const {
-        std::string preamble;
-        preamble += "#extension GL_GOOGLE_include_directive : enable\n";
-        for (auto const& macro : macros_) {
-            if (!macro.name_.empty()) {
-                preamble += "#define " + macro.name_;
-                if (!macro.val_.empty()) {
-                    preamble += " " + macro.val_;
-                }
-                preamble += "\n";
-            }
-        }
-        return preamble;
+    [[nodiscard]] std::vector<macro> const& getMacros() const {
+        return macros_;
     }
 
 private:
