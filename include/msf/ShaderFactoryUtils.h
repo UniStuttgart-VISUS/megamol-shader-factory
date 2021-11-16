@@ -26,6 +26,8 @@ enum class ShaderType : unsigned int {
     Geometry = 0x8DD9,       // GL_GEOMETRY_SHADER
     Fragment = 0x8B30,       // GL_FRAGMENT_SHADER
     Compute = 0x91B9,        // GL_COMPUTE_SHADER
+    Mesh = 0x9559,           // GL_MESH_SHADER_NV
+    Task = 0x955A,           // GL_TASK_SHADER_NV
     None = 0x0
 };
 
@@ -56,6 +58,12 @@ static inline ShaderType getShaderType(std::filesystem::path const& file_path) {
     }
     if (shader_ext == ".comp") {
         return ShaderType::Compute;
+    }
+    if (shader_ext == ".mesh") {
+        return ShaderType::Mesh;
+    }
+    if (shader_ext == ".task") {
+        return ShaderType::Task;
     }
     return ShaderType::None;
 }
