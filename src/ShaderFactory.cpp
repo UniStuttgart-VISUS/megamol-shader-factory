@@ -14,6 +14,7 @@
 
 #include "Includer.h"
 #include "Utils.h"
+#include "msf/ShaderFactoryUtils.h"
 
 namespace {
 /*
@@ -43,17 +44,46 @@ std::tuple<bool, int, EProfile> find_and_parse_version_string(std::string const&
 
     return std::make_tuple(true, version, profile);
 }
+
+EShLanguage get_shader_type(std::filesystem::path const& file_path) {
+    auto const shader_ext = msf::getShaderExtensionString(file_path);
+    if (shader_ext == ".vert") {
+        return EShLanguage::EShLangVertex;
+    }
+    if (shader_ext == ".tesc") {
+        return EShLanguage::EShLangTessControl;
+    }
+    if (shader_ext == ".tese") {
+        return EShLanguage::EShLangTessEvaluation;
+    }
+    if (shader_ext == ".geom") {
+        return EShLanguage::EShLangGeometry;
+    }
+    if (shader_ext == ".frag") {
+        return EShLanguage::EShLangFragment;
+    }
+    if (shader_ext == ".comp") {
+        return EShLanguage::EShLangCompute;
+    }
+    if (shader_ext == ".mesh") {
+        return EShLanguage::EShLangMeshNV;
+    }
+    if (shader_ext == ".task") {
+        return EShLanguage::EShLangTaskNV;
+    }
+    return EShLanguage::EShLangVertex;
+}
 } // namespace
 
 msf::ShaderFactory::ShaderFactory() {
     if (glslangInitReferenceCounter_ <= 0) {
         glslang::InitializeProcess();
     }
-    glslangInitReferenceCounter_++;
+    ++glslangInitReferenceCounter_;
 }
 
 msf::ShaderFactory::~ShaderFactory() {
-    glslangInitReferenceCounter_--;
+    --glslangInitReferenceCounter_;
     if (glslangInitReferenceCounter_ <= 0) {
         glslang::FinalizeProcess();
         glslangInitReferenceCounter_ = 0;
@@ -82,9 +112,7 @@ std::string msf::ShaderFactory::preprocess(
         return std::string();
     }
 
-    glslang::TShader shader(EShLangVertex);
-
-    // auto const shader_type = get_shader_type_sc(final_shader_source_path);
+    glslang::TShader shader(get_shader_type(final_shader_source_path));
 
     auto const shader_source = readFileToString(final_shader_source_path);
 
