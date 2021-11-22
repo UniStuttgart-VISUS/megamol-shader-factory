@@ -39,16 +39,19 @@ private:
         vendor_str.resize(tmp.size());
         std::transform(tmp.cbegin(), tmp.cend(), vendor_str.begin(), [](GLubyte chr) { return std::tolower(chr); });
 
-        if (vendor_str.find("ati") != std::string::npos || vendor_str.find("amd") != std::string::npos) {
-            addDefinition("__AMD__");
-        }
-
         if (vendor_str.find("nvidia") != std::string::npos) {
             addDefinition("__NVIDIA__");
+            return;
         }
 
         if (vendor_str.find("intel") != std::string::npos) {
             addDefinition("__INTEL__");
+            return;
+        }
+
+        if (vendor_str.find("ati") != std::string::npos || vendor_str.find("amd") != std::string::npos) {
+            addDefinition("__AMD__");
+            return;
         }
     }
 };
