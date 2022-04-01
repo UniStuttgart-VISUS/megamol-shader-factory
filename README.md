@@ -1,8 +1,7 @@
-# MegaMol-Shader-Factory v0.1
+# MegaMol-Shader-Factory
 
 Contains utility methods to handle includes in OpenGL shaders.
 
 ## Using
-  - glslang - License: multiple licenses
-  - parts of shaderc - License: Apache 2.0
-  - glad
+  - [glslang](https://github.com/KhronosGroup/glslang) - License: multiple licenses
+  - parts of [shaderc](https://github.com/google/shaderc) - License: Apache 2.0
