@@ -45,32 +45,27 @@ std::tuple<bool, int, EProfile> find_and_parse_version_string(std::string const&
 }
 
 EShLanguage get_shader_type(std::filesystem::path const& file_path) {
-    auto const shader_ext = msf::getShaderExtensionString(file_path);
-    if (shader_ext == ".vert") {
+    switch (msf::getShaderType(file_path)) {
+    case msf::ShaderType::Vertex:
         return EShLanguage::EShLangVertex;
-    }
-    if (shader_ext == ".tesc") {
+    case msf::ShaderType::TessControl:
         return EShLanguage::EShLangTessControl;
-    }
-    if (shader_ext == ".tese") {
+    case msf::ShaderType::TessEvaluation:
         return EShLanguage::EShLangTessEvaluation;
-    }
-    if (shader_ext == ".geom") {
+    case msf::ShaderType::Geometry:
         return EShLanguage::EShLangGeometry;
-    }
-    if (shader_ext == ".frag") {
+    case msf::ShaderType::Fragment:
         return EShLanguage::EShLangFragment;
-    }
-    if (shader_ext == ".comp") {
+    case msf::ShaderType::Compute:
         return EShLanguage::EShLangCompute;
-    }
-    if (shader_ext == ".mesh") {
+    case msf::ShaderType::Mesh:
         return EShLanguage::EShLangMeshNV;
-    }
-    if (shader_ext == ".task") {
+    case msf::ShaderType::Task:
         return EShLanguage::EShLangTaskNV;
+    case msf::ShaderType::None:
+    default:
+        return EShLanguage::EShLangVertex; // Default to vertex.
     }
-    return EShLanguage::EShLangVertex;
 }
 } // namespace
 
