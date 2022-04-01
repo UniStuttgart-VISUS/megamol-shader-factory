@@ -5,6 +5,7 @@
 #include "msf/ShaderFactory.h"
 
 #include <algorithm>
+#include <regex>
 #include <sstream>
 #include <string>
 #include <tuple>
@@ -17,32 +18,30 @@
 #include "msf/ShaderFactoryUtils.h"
 
 namespace {
-/*
- * Adapted from : https://github.com/google/shaderc/blob/main/libshaderc_util/src/compiler.cc
- * License : Apache 2.0
- */
+
 std::tuple<bool, int, EProfile> find_and_parse_version_string(std::string const& shader_source) {
-    auto version_pos = shader_source.find("#version");
-    if (version_pos == std::string::npos) {
-        return std::make_tuple(false, 0, ENoProfile);
-    }
-    auto version_string = shader_source.substr(version_pos + std::strlen("#version"));
-    version_string = version_string.substr(0, version_string.find_first_of('\n'));
-    version_string.erase(std::remove(version_string.begin(), version_string.end(), ' '), version_string.end());
-    int version = 0;
-    std::string profile_name;
-    std::istringstream(version_string) >> version >> profile_name;
+    // Find first '#version' at beginning of a line (ignoring white spaces)
+    std::regex regex("(^|\n)\\s*#version\\s*(.*)");
+    std::smatch match;
+    if (std::regex_search(shader_source, match, regex)) {
+        int version = 0;
+        std::string profile_name;
+        std::istringstream(match[2].str()) >> version >> profile_name;
 
-    EProfile profile = ENoProfile;
+        EProfile profile = ENoProfile;
 
-    if (profile_name == glslang::ProfileName(ECoreProfile)) {
-        profile = ECoreProfile;
-    }
-    if (profile_name == glslang::ProfileName(ECompatibilityProfile)) {
-        profile = ECompatibilityProfile;
+        if (profile_name == glslang::ProfileName(ECoreProfile)) {
+            profile = ECoreProfile;
+        } else if (profile_name == glslang::ProfileName(ECompatibilityProfile)) {
+            profile = ECompatibilityProfile;
+        } else if (profile_name == glslang::ProfileName(EEsProfile)) {
+            profile = EEsProfile;
+        }
+
+        return std::make_tuple(true, version, profile);
     }
 
-    return std::make_tuple(true, version, profile);
+    return std::make_tuple(false, 0, ENoProfile);
 }
 
 EShLanguage get_shader_type(std::filesystem::path const& file_path) {
@@ -146,7 +145,7 @@ std::string msf::ShaderFactory::preprocess(
     EProfile profile = ENoProfile;
     std::tie(succes_version_string, version, profile) = find_and_parse_version_string(shader_source);
     if (!succes_version_string) {
-        return std::string();
+        throw std::runtime_error("Error preprocessing shader: missing #version");
     }
 
     Includer includer(options.getIncludePaths());
