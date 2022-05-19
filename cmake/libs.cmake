@@ -11,7 +11,7 @@ mark_as_advanced(FORCE
 # glslang
 FetchContent_Declare(glslang
   GIT_REPOSITORY https://github.com/KhronosGroup/glslang.git
-  GIT_TAG 11.8.0)
+  GIT_TAG 11.9.0)
 FetchContent_GetProperties(glslang)
 if (NOT glslang_POPULATED)
   FetchContent_Populate(glslang)
