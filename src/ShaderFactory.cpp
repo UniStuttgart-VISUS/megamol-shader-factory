@@ -146,7 +146,7 @@ std::string msf::ShaderFactory::preprocess(
     Includer includer(options.getIncludePaths());
     std::string output;
     auto const success = shader.preprocess(
-        &glslang::DefaultTBuiltInResource, version, profile, true, false, EShMsgDefault, &output, includer);
+        &glslang::DefaultTBuiltInResource, version, profile, true, false, EShMsgOnlyPreprocessor, &output, includer);
 
     if (!success) {
         throw std::runtime_error(std::string("Error preprocessing shader:\n") + shader.getInfoLog());
