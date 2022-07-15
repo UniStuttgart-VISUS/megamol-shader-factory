@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
 
 # Project
 project(msf
-  VERSION 0.1.0
+  VERSION 0.9.0
   LANGUAGES CXX)
 
 # Set a default build type if none was specified
@@ -58,15 +58,46 @@ install(DIRECTORY
   ${CMAKE_CURRENT_SOURCE_DIR}/include/
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
+install(TARGETS msf_static
+  EXPORT msfTargets
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+install(EXPORT msfTargets
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/msf
+  NAMESPACE msf::
+  FILE msfConfigTargets.cmake)
+
+include(CMakePackageConfigHelpers)
+configure_package_config_file(
+  "${CMAKE_CURRENT_LIST_DIR}/cmake/msfConfig.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/msfConfig.cmake"
+  INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/msf")
+
+write_basic_package_version_file(
+  "${CMAKE_CURRENT_BINARY_DIR}/msfConfigVersion.cmake"
+  VERSION ${PROJECT_VERSION}
+  COMPATIBILITY SameMinorVersion)
+
+install(FILES
+  "${CMAKE_CURRENT_BINARY_DIR}/msfConfig.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/msfConfigVersion.cmake"
+  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/msf")
+
 get_target_property(combined_lib_file msf_combined IMPORTED_LOCATION)
 # Fix for Visual Studio, see: https://github.com/google/shaderc/blob/v2021.0/libshaderc/CMakeLists.txt#L101-L112
 string(REGEX MATCH "Visual Studio .*" vs_generator "${CMAKE_GENERATOR}")
 if (NOT "${vs_generator}" STREQUAL "")
-  string(REPLACE "$(Configuration)" "\${CMAKE_INSTALL_CONFIG_NAME}" combined_lib_file_vs "${combined_lib_file}")
-  install(FILES ${combined_lib_file_vs} DESTINATION ${CMAKE_INSTALL_LIBDIR})
-else()
-  install(FILES ${combined_lib_file} DESTINATION ${CMAKE_INSTALL_LIBDIR})
-endif()
+  string(REPLACE "$(Configuration)" "\${CMAKE_INSTALL_CONFIG_NAME}" combined_lib_file "${combined_lib_file}")
+endif ()
+install(FILES ${combined_lib_file} DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+# The above install commands install *Config.cmake files only for the msf_static target, we now just replace the
+# msf_static library file by the bundled version, to use the bundled version with find_package().
+set(install_dir "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
+get_filename_component(filename_bundle "${combined_lib_file}" NAME)
+install(CODE "file(RENAME \"${install_dir}/${filename_bundle}\" \"${install_dir}/$<TARGET_FILE_NAME:msf_static>\")")
 
 # Source groups in Visual Studio
 set_target_properties(msf_static PROPERTIES FOLDER base)
