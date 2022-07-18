@@ -87,23 +87,26 @@ msf::ShaderFactory::~ShaderFactory() {
 std::string msf::ShaderFactory::preprocess(
     std::filesystem::path const& shader_source_path, ShaderFactoryOptions const& options) const {
     std::filesystem::path final_shader_source_path;
+    bool found_path = false;
     if (std::filesystem::exists(shader_source_path)) {
+        found_path = true;
         final_shader_source_path = shader_source_path;
     } else if (shader_source_path.is_relative()) {
-        bool found_path = false;
         for (auto const& el : options.getIncludePaths()) {
             auto search_path = el / shader_source_path;
             if (std::filesystem::exists(search_path)) {
                 if (found_path) {
-                    return std::string();
+                    throw std::runtime_error("Shader path \"" + shader_source_path.string() +
+                                             "\" is not unique within given include directories!");
                 } else {
                     found_path = true;
                     final_shader_source_path = search_path;
                 }
             }
         }
-    } else {
-        return std::string();
+    }
+    if (!found_path) {
+        throw std::runtime_error("Shader path \"" + shader_source_path.string() + "\" not found!");
     }
 
     glslang::TShader shader(get_shader_type(final_shader_source_path));
