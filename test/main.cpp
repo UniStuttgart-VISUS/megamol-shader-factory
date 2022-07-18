@@ -9,7 +9,7 @@ int main() {
     options.addDefinition("__AMD__");
 
     msf::ShaderFactory factory;
-    auto source = factory.preprocess("../test/test.vert.glsl", options);
+    auto source = factory.preprocess("test.vert.glsl", options);
     std::cout << "============================================================" << std::endl;
     std::cout << source << std::endl;
     std::cout << "============================================================" << std::endl;
