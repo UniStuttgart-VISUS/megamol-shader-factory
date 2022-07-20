@@ -46,7 +46,3 @@ set_property(TARGET glslang-default-resource-limits PROPERTY POSITION_INDEPENDEN
 
 target_include_directories(glslang-default-resource-limits
   PUBLIC $<BUILD_INTERFACE:${glslang_SOURCE_DIR}/StandAlone>)
-
-install(TARGETS glslang-default-resource-limits EXPORT glslang-default-resource-limitsTargets
-  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
-install(EXPORT glslang-default-resource-limitsTargets DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake)

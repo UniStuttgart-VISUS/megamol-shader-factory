@@ -12,14 +12,22 @@ if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "RelWithDebInfo" "MinSizeRel")
 endif ()
 
+# Options
+option(MSF_INTEGRATED_GLSLANG "Integrate glslang." ON)
+option(MSF_BUILD_TEST "Build tests." OFF)
+
 # Dependencies
-include(cmake/libs.cmake)
+if (MSF_INTEGRATED_GLSLANG)
+  include(cmake/fetch_glslang.cmake)
+else ()
+  # vcpkg support
+  find_package(glslang REQUIRED)
+  target_include_directories(glslang-default-resource-limits INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/cmake/glslang_workaround>)
+endif ()
 
 # Utils
 include(cmake/shaderc_utils.cmake)
-
-# Options
-option(BUILD_MSF_TEST "BUILD_MSF_TEST" OFF)
 
 # Collect source files
 file(GLOB_RECURSE public_header_files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "include/*.h")
@@ -40,17 +48,6 @@ target_include_directories(msf_static
   PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-# Bundle with all glslang libs into a single static library
-shaderc_combine_static_lib(msf_combined msf_static)
-target_include_directories(msf_combined INTERFACE
-  $<INSTALL_INTERFACE:include>
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
-if (NOT WIN32)
-  # Required for glslang::osdependent
-  find_package(Threads)
-  target_link_libraries(msf_combined INTERFACE Threads::Threads)
-endif ()
-
 # Install
 include(GNUInstallDirs)
 
@@ -58,46 +55,57 @@ install(DIRECTORY
   ${CMAKE_CURRENT_SOURCE_DIR}/include/
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-install(TARGETS msf_static
-  EXPORT msfTargets
-  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+if (MSF_INTEGRATED_GLSLANG)
 
-install(EXPORT msfTargets
-  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/msf
-  NAMESPACE msf::
-  FILE msfConfigTargets.cmake)
+  # Bundle with all glslang libs into a single static library
+  shaderc_combine_static_lib(msf_combined msf_static)
+  target_include_directories(msf_combined INTERFACE
+    $<INSTALL_INTERFACE:include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
+  if (NOT WIN32)
+    # Required for glslang::osdependent
+    find_package(Threads)
+    target_link_libraries(msf_combined INTERFACE Threads::Threads)
+  endif ()
 
-include(CMakePackageConfigHelpers)
-configure_package_config_file(
-  "${CMAKE_CURRENT_LIST_DIR}/cmake/msfConfig.cmake.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/msfConfig.cmake"
-  INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/msf")
+  get_target_property(combined_lib_file msf_combined IMPORTED_LOCATION)
+  # Fix for Visual Studio, see: https://github.com/google/shaderc/blob/v2021.0/libshaderc/CMakeLists.txt#L101-L112
+  string(REGEX MATCH "Visual Studio .*" vs_generator "${CMAKE_GENERATOR}")
+  if (NOT "${vs_generator}" STREQUAL "")
+    string(REPLACE "$(Configuration)" "\${CMAKE_INSTALL_CONFIG_NAME}" combined_lib_file "${combined_lib_file}")
+  endif ()
+  install(FILES ${combined_lib_file} DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-write_basic_package_version_file(
-  "${CMAKE_CURRENT_BINARY_DIR}/msfConfigVersion.cmake"
-  VERSION ${PROJECT_VERSION}
-  COMPATIBILITY SameMinorVersion)
+else ()
 
-install(FILES
-  "${CMAKE_CURRENT_BINARY_DIR}/msfConfig.cmake"
-  "${CMAKE_CURRENT_BINARY_DIR}/msfConfigVersion.cmake"
-  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/msf")
+  install(TARGETS msf_static
+    EXPORT msfTargets
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-get_target_property(combined_lib_file msf_combined IMPORTED_LOCATION)
-# Fix for Visual Studio, see: https://github.com/google/shaderc/blob/v2021.0/libshaderc/CMakeLists.txt#L101-L112
-string(REGEX MATCH "Visual Studio .*" vs_generator "${CMAKE_GENERATOR}")
-if (NOT "${vs_generator}" STREQUAL "")
-  string(REPLACE "$(Configuration)" "\${CMAKE_INSTALL_CONFIG_NAME}" combined_lib_file "${combined_lib_file}")
+  install(EXPORT msfTargets
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/msf
+    NAMESPACE msf::
+    FILE msfConfigTargets.cmake)
+
+  include(CMakePackageConfigHelpers)
+  configure_package_config_file(
+    "${CMAKE_CURRENT_LIST_DIR}/cmake/msfConfig.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/msfConfig.cmake"
+    INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/msf")
+
+  write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/msfConfigVersion.cmake"
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMinorVersion)
+
+  install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/msfConfig.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/msfConfigVersion.cmake"
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/msf")
+
 endif ()
-install(FILES ${combined_lib_file} DESTINATION ${CMAKE_INSTALL_LIBDIR})
-
-# The above install commands install *Config.cmake files only for the msf_static target, we now just replace the
-# msf_static library file by the bundled version, to use the bundled version with find_package().
-set(install_dir "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
-get_filename_component(filename_bundle "${combined_lib_file}" NAME)
-install(CODE "file(RENAME \"${install_dir}/${filename_bundle}\" \"${install_dir}/$<TARGET_FILE_NAME:msf_static>\")")
 
 # Source groups in Visual Studio
 set_target_properties(msf_static PROPERTIES FOLDER base)
@@ -121,9 +129,9 @@ foreach (FILE_NAME ${public_header_files})
 endforeach ()
 
 # Test
-if (BUILD_MSF_TEST)
-  add_executable(mmshader_test test/main.cpp)
-  target_link_libraries(mmshader_test PRIVATE msf_static)
-  set_property(TARGET mmshader_test PROPERTY CXX_STANDARD 17)
-  set_property(TARGET mmshader_test PROPERTY CXX_EXTENSIONS OFF)
+if (MSF_BUILD_TEST)
+  add_executable(msf_test test/main.cpp)
+  target_link_libraries(msf_test PRIVATE msf_static)
+  set_property(TARGET msf_test PROPERTY CXX_STANDARD 17)
+  set_property(TARGET msf_test PROPERTY CXX_EXTENSIONS OFF)
 endif ()
