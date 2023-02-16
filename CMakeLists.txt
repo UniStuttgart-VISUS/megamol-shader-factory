@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
 
 # Project
 project(msf
-  VERSION 0.10.0
+  VERSION 0.11.0
   LANGUAGES CXX)
 
 # Set a default build type if none was specified
