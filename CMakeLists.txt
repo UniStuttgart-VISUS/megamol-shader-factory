@@ -22,6 +22,7 @@ if (MSF_INTEGRATED_GLSLANG)
   set(GLSLANG_NAMESPACE "")
 else ()
   # vcpkg support
+  find_package(Threads REQUIRED) # Required for glslang::OSDependent, but glslang does not include it.
   find_package(glslang REQUIRED)
   set(GLSLANG_NAMESPACE "glslang::")
 endif ()
