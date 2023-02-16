@@ -10,7 +10,7 @@
 #include <string>
 #include <tuple>
 
-#include <ResourceLimits.h>
+#include <glslang/Public/ResourceLimits.h>
 #include <glslang/Public/ShaderLang.h>
 
 #include "Includer.h"
@@ -149,7 +149,7 @@ std::string msf::ShaderFactory::preprocess(
     Includer includer(options.getIncludePaths());
     std::string output;
     auto const success = shader.preprocess(
-        &glslang::DefaultTBuiltInResource, version, profile, true, false, EShMsgOnlyPreprocessor, &output, includer);
+        GetDefaultResources(), version, profile, true, false, EShMsgOnlyPreprocessor, &output, includer);
 
     if (!success) {
         throw std::runtime_error(std::string("Error preprocessing shader:\n") + shader.getInfoLog());

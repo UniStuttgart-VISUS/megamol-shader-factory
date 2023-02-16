@@ -22,8 +22,6 @@ if (MSF_INTEGRATED_GLSLANG)
 else ()
   # vcpkg support
   find_package(glslang REQUIRED)
-  target_include_directories(glslang-default-resource-limits INTERFACE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/cmake/glslang_workaround>)
 endif ()
 
 # Utils
