@@ -19,7 +19,7 @@ void msf::ShaderFactoryOptionsOpenGL::addVendorDefinition() {
     }
 
     std::string vendor = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
-    std::transform(vendor.cbegin(), vendor.cend(), vendor.begin(), [](GLubyte chr) { return std::tolower(chr); });
+    std::transform(vendor.begin(), vendor.end(), vendor.begin(), [](unsigned char c) { return std::tolower(c); });
 
     if (vendor.find("nvidia") != std::string::npos) {
         addDefinition("__NVIDIA__");
