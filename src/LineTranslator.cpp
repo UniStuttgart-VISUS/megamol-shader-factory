@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2021 University of Stuttgart (VISUS).
+ * Copyright (C) 2020-2023 University of Stuttgart (VISUS).
  * All rights reserved.
  */
 #include "msf/LineTranslator.h"
