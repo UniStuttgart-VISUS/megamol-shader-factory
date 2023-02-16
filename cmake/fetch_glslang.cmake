@@ -11,7 +11,7 @@ mark_as_advanced(FORCE
 # glslang
 FetchContent_Declare(glslang
   GIT_REPOSITORY https://github.com/KhronosGroup/glslang.git
-  GIT_TAG 11.10.0)
+  GIT_TAG 12.0.0)
 FetchContent_GetProperties(glslang)
 if (NOT glslang_POPULATED)
   message(STATUS "Fetch glslang ...")
@@ -27,10 +27,10 @@ if (NOT glslang_POPULATED)
   option(ENABLE_PCH "" ON)
   option(ENABLE_RTTI "" OFF)
   option(ENABLE_SPVREMAPPER "" OFF)
+  add_subdirectory(${glslang_SOURCE_DIR} ${glslang_BINARY_DIR} EXCLUDE_FROM_ALL)
   mark_as_advanced(FORCE
     FETCHCONTENT_SOURCE_DIR_GLSLANG
     FETCHCONTENT_UPDATES_DISCONNECTED_GLSLANG)
-  add_subdirectory(${glslang_SOURCE_DIR} ${glslang_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif ()
 
 # We want to use glslang-default-resource-limits which is included with ENABLE_GLSLANG_BINARIES. Unfortunately, other
@@ -45,4 +45,4 @@ set_property(TARGET glslang-default-resource-limits PROPERTY FOLDER glslang)
 set_property(TARGET glslang-default-resource-limits PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 target_include_directories(glslang-default-resource-limits
-  PUBLIC $<BUILD_INTERFACE:${glslang_SOURCE_DIR}/StandAlone>)
+  PUBLIC $<BUILD_INTERFACE:${glslang_SOURCE_DIR}>)

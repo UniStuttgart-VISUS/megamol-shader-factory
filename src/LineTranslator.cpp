@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2021 University of Stuttgart (VISUS).
+ * Copyright (C) 2020-2023 University of Stuttgart (VISUS).
  * All rights reserved.
  */
 #include "msf/LineTranslator.h"
@@ -12,15 +12,15 @@ msf::LineTranslator::LineTranslator() : next_id_(10000) {}
 std::string msf::LineTranslator::cleanupShader(const std::string& shader_source) {
     // The shader factory outputs #line annotations in the following form:
     //   #line 123 "source.glsl"
-    // GLSL standard only allows allows two ints as params for #line. Therefore,
-    // we replace the string with an int and store the int to filename mapping.
+    // GLSL standard only allows two ints as params for #line. Therefore, we
+    // replace the string with an int and store the int to filename mapping.
     //
     // The allowed range of the second in param depends on the driver:
     // NVIDIA: int32_t
     // AMD: int16_t
     // Intel: uint16_t
     // Therefore, the max int id we should use is 32767 (max of short).
-    // Just start by 10000 to constantly use 5 char numbers for stable regex replacement later.
+    // Start by 10000 to constantly use 5 char numbers for stable regex replacement later.
 
     const std::regex line_pattern("^#line ([0-9]+) \"(.*)\".*");
     const std::regex google_include_pattern("^#extension[ ]*GL_GOOGLE_include_directive.*");

@@ -19,11 +19,12 @@ option(MSF_BUILD_TEST "Build tests." OFF)
 # Dependencies
 if (MSF_INTEGRATED_GLSLANG)
   include(cmake/fetch_glslang.cmake)
+  set(GLSLANG_NAMESPACE "")
 else ()
   # vcpkg support
+  find_package(Threads REQUIRED) # Required for glslang::OSDependent, but glslang does not include it.
   find_package(glslang REQUIRED)
-  target_include_directories(glslang-default-resource-limits INTERFACE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/cmake/glslang_workaround>)
+  set(GLSLANG_NAMESPACE "glslang::")
 endif ()
 
 # Utils
@@ -40,7 +41,10 @@ target_compile_features(msf_static PUBLIC cxx_std_17)
 set_target_properties(msf_static PROPERTIES
   CXX_EXTENSIONS OFF
   POSITION_INDEPENDENT_CODE ON)
-target_link_libraries(msf_static PRIVATE glslang glslang-default-resource-limits)
+target_link_libraries(msf_static
+  PRIVATE
+    "${GLSLANG_NAMESPACE}glslang"
+    "${GLSLANG_NAMESPACE}glslang-default-resource-limits")
 target_include_directories(msf_static
   PUBLIC
     $<INSTALL_INTERFACE:include>
