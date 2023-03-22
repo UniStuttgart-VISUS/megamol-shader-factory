@@ -10,8 +10,8 @@ mark_as_advanced(FORCE
 
 # glslang
 FetchContent_Declare(glslang
-  GIT_REPOSITORY https://github.com/KhronosGroup/glslang.git
-  GIT_TAG 12.1.0)
+  URL "https://github.com/KhronosGroup/glslang/archive/12.1.0.tar.gz"
+  URL_HASH SHA256=1515e840881d1128fb6d831308433f731808f818f2103881162f3ffd47b15cd5)
 FetchContent_GetProperties(glslang)
 if (NOT glslang_POPULATED)
   message(STATUS "Fetch glslang ...")
