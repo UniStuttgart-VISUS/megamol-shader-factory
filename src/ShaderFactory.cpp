@@ -70,6 +70,7 @@ EShLanguage get_shader_type(std::filesystem::path const& file_path) {
 } // namespace
 
 msf::ShaderFactory::ShaderFactory() {
+    const std::lock_guard<std::mutex> lock(glslangInitMtx_);
     if (glslangInitReferenceCounter_ <= 0) {
         glslang::InitializeProcess();
     }
@@ -77,6 +78,7 @@ msf::ShaderFactory::ShaderFactory() {
 }
 
 msf::ShaderFactory::~ShaderFactory() {
+    const std::lock_guard<std::mutex> lock(glslangInitMtx_);
     --glslangInitReferenceCounter_;
     if (glslangInitReferenceCounter_ <= 0) {
         glslang::FinalizeProcess();

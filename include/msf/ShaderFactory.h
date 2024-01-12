@@ -5,6 +5,7 @@
 #pragma once
 
 #include <filesystem>
+#include <mutex>
 
 #include "ShaderFactoryOptions.h"
 
@@ -25,6 +26,7 @@ public:
 
 private:
     static inline int glslangInitReferenceCounter_ = 0;
+    static inline std::mutex glslangInitMtx_;
 };
 
 } // namespace msf
