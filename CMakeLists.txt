@@ -22,7 +22,6 @@ if (MSF_INTEGRATED_GLSLANG)
   set(GLSLANG_NAMESPACE "")
 else ()
   # vcpkg support
-  find_package(Threads REQUIRED) # Required for glslang::OSDependent, but glslang does not include it.
   find_package(glslang REQUIRED)
   set(GLSLANG_NAMESPACE "glslang::")
 endif ()
@@ -66,19 +65,13 @@ if (MSF_INTEGRATED_GLSLANG)
   target_include_directories(msf_combined INTERFACE
     $<INSTALL_INTERFACE:include>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
-  if (NOT WIN32)
-    # Required for glslang::osdependent
+  if (UNIX)
+    # Required for glslang::OSDependent, but shaderc_combine_static_lib drops non static dependencies.
     find_package(Threads)
     target_link_libraries(msf_combined INTERFACE Threads::Threads)
   endif ()
 
-  get_target_property(combined_lib_file msf_combined IMPORTED_LOCATION)
-  # Fix for Visual Studio, see: https://github.com/google/shaderc/blob/v2021.0/libshaderc/CMakeLists.txt#L101-L112
-  string(REGEX MATCH "Visual Studio .*" vs_generator "${CMAKE_GENERATOR}")
-  if (NOT "${vs_generator}" STREQUAL "")
-    string(REPLACE "$(Configuration)" "\${CMAKE_INSTALL_CONFIG_NAME}" combined_lib_file "${combined_lib_file}")
-  endif ()
-  install(FILES ${combined_lib_file} DESTINATION ${CMAKE_INSTALL_LIBDIR})
+  install(TARGETS msf_combined DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 else ()
 
