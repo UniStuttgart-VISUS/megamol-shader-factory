@@ -10,15 +10,14 @@ mark_as_advanced(FORCE
 
 # glslang
 FetchContent_Declare(glslang
-  URL "https://github.com/KhronosGroup/glslang/archive/12.1.0.tar.gz"
-  URL_HASH SHA256=1515e840881d1128fb6d831308433f731808f818f2103881162f3ffd47b15cd5)
+  URL "https://github.com/KhronosGroup/glslang/archive/14.0.0.tar.gz"
+  URL_HASH SHA256=80bbb916a23e94ea9cbfb1acb5d1a44a7e0c9613bcf5b5947c03f2273bdc92b0)
 FetchContent_GetProperties(glslang)
 if (NOT glslang_POPULATED)
   message(STATUS "Fetch glslang ...")
   FetchContent_Populate(glslang)
   option(BUILD_EXTERNAL "" OFF)
   option(BUILD_SHARED_LIBS "" OFF)
-  option(ENABLE_CTEST "" OFF)
   option(ENABLE_EXCEPTIONS "" ON)
   option(ENABLE_GLSLANG_BINARIES "" OFF)
   option(ENABLE_GLSLANG_JS "" OFF)
@@ -27,6 +26,7 @@ if (NOT glslang_POPULATED)
   option(ENABLE_PCH "" ON)
   option(ENABLE_RTTI "" OFF)
   option(ENABLE_SPVREMAPPER "" OFF)
+  option(GLSLANG_TESTS "" OFF)
   add_subdirectory(${glslang_SOURCE_DIR} ${glslang_BINARY_DIR} EXCLUDE_FROM_ALL)
   mark_as_advanced(FORCE
     FETCHCONTENT_SOURCE_DIR_GLSLANG
